@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="flink,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="本文会主要讲三种udf：  ScalarFunction  TableFunction  AggregateFunction   &amp;nbsp; &amp;nbsp; 用户自定义函数是非常重要的一个特征，因为他极大地扩展了查询的表达能力。本文除了介绍这三种udf之外，最后会介绍一个redis作为交互数据源的udf案例。  注册用户自定义函数  &amp;nbsp; &amp;nbsp;在大多数场景下，用户自定义函数在使用之">
+<meta name="keywords" content="flink">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flink UDF">
+<meta property="og:url" content="http://yoursite.com/2019/07/27/flinkUDF/index.html">
+<meta property="og:site_name" content="林夕的部落格">
+<meta property="og:description" content="本文会主要讲三种udf：  ScalarFunction  TableFunction  AggregateFunction   &amp;nbsp; &amp;nbsp; 用户自定义函数是非常重要的一个特征，因为他极大地扩展了查询的表达能力。本文除了介绍这三种udf之外，最后会介绍一个redis作为交互数据源的udf案例。  注册用户自定义函数  &amp;nbsp; &amp;nbsp;在大多数场景下，用户自定义函数在使用之">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-07-27T02:05:11.631Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flink UDF">
+<meta name="twitter:description" content="本文会主要讲三种udf：  ScalarFunction  TableFunction  AggregateFunction   &amp;nbsp; &amp;nbsp; 用户自定义函数是非常重要的一个特征，因为他极大地扩展了查询的表达能力。本文除了介绍这三种udf之外，最后会介绍一个redis作为交互数据源的udf案例。  注册用户自定义函数  &amp;nbsp; &amp;nbsp;在大多数场景下，用户自定义函数在使用之">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/07/27/flinkUDF/">
+
+
+
+
+
+  <title>Flink UDF | 林夕的部落格</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">林夕的部落格</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">惟有不相忘，可抵岁月长！</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-schedule">
+          <a href="/schedule/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>
+            
+            日程表
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/27/flinkUDF/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="林夕_Yume">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/monkey.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="林夕的部落格">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Flink UDF</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-07-27T10:05:11+08:00">
+                2019-07-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/实用技术/" itemprop="url" rel="index">
+                    <span itemprop="name">实用技术</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/实用技术/Flink/" itemprop="url" rel="index">
+                    <span itemprop="name">Flink</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本文会主要讲三种udf：</p>
+<ul>
+<li><p>ScalarFunction</p>
+</li>
+<li><p>TableFunction</p>
+</li>
+<li><p>AggregateFunction</p>
+</li>
+</ul>
+<p>&nbsp; &nbsp; 用户自定义函数是非常重要的一个特征，因为他极大地扩展了查询的表达能力。本文除了介绍这三种udf之外，最后会介绍一个redis作为交互数据源的udf案例。</p>
+<blockquote>
+<p><strong>注册用户自定义函数</strong></p>
+</blockquote>
+<p>&nbsp; &nbsp;在大多数场景下，用户自定义函数在使用之前是必须要注册的。对于Scala的Table API，udf是不需要注册的。</p>
+<p>&nbsp; &nbsp;调用TableEnvironment的registerFunction()方法来实现注册。Udf注册成功之后，会被插入TableEnvironment的function catalog，这样table API和sql就能解析他了。</p>
+<h1 id="1-Scalar-Functions-标量函数"><a href="#1-Scalar-Functions-标量函数" class="headerlink" title="1.Scalar Functions 标量函数"></a>1.Scalar Functions 标量函数</h1><p>&nbsp; &nbsp;标量函数，是指返回一个值的函数。标量函数是实现将0，1，或者多个标量值转化为一个新值。</p>
+<p>&nbsp; &nbsp;实现一个标量函数需要继承ScalarFunction，并且实现一个或者多个evaluation方法。标量函数的行为就是通过evaluation方法来实现的。evaluation方法必须定义为public，命名为eval。evaluation方法的输入参数类型和返回值类型决定着标量函数的输入参数类型和返回值类型。evaluation方法也可以被重载实现多个eval。同时evaluation方法支持变参数，例如：eval(String… strs)。</p>
+<p>下面给出一个标量函数的例子。例子实现的是一个hashcode方法。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">public class HashCode extends ScalarFunction &#123;</span><br><span class="line">private int factor = 12;</span><br><span class="line">public HashCode(int factor) &#123;</span><br><span class="line">    this.factor = factor;</span><br><span class="line">&#125;</span><br><span class="line">public int eval(String s) &#123;</span><br><span class="line">   return s.hashCode() * factor;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line">BatchTableEnvironment tableEnv = TableEnvironment.getTableEnvironment(env);</span><br><span class="line">// register the function</span><br><span class="line">tableEnv.registerFunction(&quot;hashCode&quot;, new HashCode(10));</span><br><span class="line">// use the function in Java Table API</span><br><span class="line">myTable.select(&quot;string, string.hashCode(), hashCode(string)&quot;);</span><br><span class="line">// use the function in SQL API</span><br><span class="line"></span><br><span class="line">tableEnv.sqlQuery(&quot;SELECT string, HASHCODE(string) FROM MyTable&quot;);</span><br></pre></td></tr></table></figure>
+
+<p>&nbsp; &nbsp;默认情况下evaluation方法的返回值类型是由flink类型抽取工具决定。对于基础类型及简单的POJOS是足够的，但是更复杂的类型，自定义类型，组合类型，会报错。这种情况下，返回值类型的TypeInformation，需要手动指定，方法是重载ScalarFunction#getResultType()。</p>
+<p>&nbsp; &nbsp;下面给一个例子，通过复写ScalarFunction#getResultType()，将long型的返回值在代码生成的时候翻译成Types.TIMESTAMP。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public static class TimestampModifier extends ScalarFunction &#123;</span><br><span class="line">public long eval(long t) &#123;</span><br><span class="line">  return t % 1000;</span><br><span class="line">&#125;</span><br><span class="line">public TypeInformation&lt;?&gt; getResultType(signature: Class&lt;?&gt;[]) &#123;</span><br><span class="line">  return Types.TIMESTAMP;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="2-Table-Functions-表函数"><a href="#2-Table-Functions-表函数" class="headerlink" title="2.Table Functions 表函数"></a>2.Table Functions 表函数</h1><p>&nbsp; &nbsp;与标量函数相似之处是输入可以0，1，或者多个参数，但是不同之处可以输出任意数目的行数。返回的行也可以包含一个或者多个列。</p>
+<p>&nbsp; &nbsp;为了自定义表函数，需要继承TableFunction，实现一个或者多个evaluation方法。表函数的行为定义在这些evaluation方法内部，函数名为eval并且必须是public。TableFunction可以重载多个eval方法。Evaluation方法的输入参数类型，决定着表函数的输入类型。Evaluation方法也支持变参，例如：eval(String… strs)。返回表的类型取决于TableFunction的基本类型。Evaluation方法使用collect(T)发射输出rows。</p>
+<p>&nbsp; &nbsp;在Table API中，表函数在scala语言中使用方法如下：.join(Expression) 或者 .leftOuterJoin(Expression)，在java语言中使用方法如下：.join(String) 或者.leftOuterJoin(String)。</p>
+<ul>
+<li>Join操作算子会使用表函数(操作算子右边的表)产生的所有行进行(cross) join 外部表(操作算子左边的表)的每一行。</li>
+</ul>
+<ul>
+<li>leftOuterJoin操作算子会使用表函数(操作算子右边的表)产生的所有行进行(cross) join 外部表(操作算子左边的表)的每一行，并且在表函数返回一个空表的情况下会保留所有的outer rows。</li>
+</ul>
+<p>在sql语法中稍微有点区别：</p>
+<ul>
+<li>cross join用法是LATERAL TABLE(<tablefunction>)。</tablefunction></li>
+<li>LEFT JOIN用法是在join条件中加入ON TRUE。</li>
+</ul>
+<p>下面的例子讲的是如何使用表值函数。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">// The generic type &quot;Tuple2&lt;String, Integer&gt;&quot; determines the schema of the returned table as (String, Integer).</span><br><span class="line"></span><br><span class="line">public class Split extends TableFunction&lt;Tuple2&lt;String, Integer&gt;&gt; &#123;</span><br><span class="line"></span><br><span class="line">  private String separator = &quot; &quot;;</span><br><span class="line">  public Split(String separator) &#123;</span><br><span class="line">      this.separator = separator;</span><br><span class="line">  &#125;</span><br><span class="line">  public void eval(String str) &#123;</span><br><span class="line">      for (String s : str.split(separator)) &#123;</span><br><span class="line">          // use collect(...) to emit a row</span><br><span class="line">          collect(new Tuple2&lt;String, Integer&gt;(s, s.length()));</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">BatchTableEnvironment tableEnv = TableEnvironment.getTableEnvironment(env);</span><br><span class="line">Table myTable = ...         // table schema: [a: String]</span><br><span class="line">// Register the function.</span><br><span class="line">tableEnv.registerFunction(&quot;split&quot;, new Split(&quot;#&quot;));</span><br><span class="line">// Use the table function in the Java Table API. &quot;as&quot; specifies the field names of the table.</span><br><span class="line">myTable.join(&quot;split(a) as (word, length)&quot;).select(&quot;a, word, length&quot;);</span><br><span class="line"></span><br><span class="line">myTable.leftOuterJoin(&quot;split(a) as (word, length)&quot;).select(&quot;a, word, length&quot;);</span><br><span class="line"></span><br><span class="line">// Use the table function in SQL with LATERAL and TABLE keywords.</span><br><span class="line">// CROSS JOIN a table function (equivalent to &quot;join&quot; in Table API).</span><br><span class="line">tableEnv.sqlQuery(&quot;SELECT a, word, length FROM MyTable, LATERAL TABLE(split(a)) as T(word, length)&quot;);</span><br><span class="line">// LEFT JOIN a table function (equivalent to &quot;leftOuterJoin&quot; in Table API).</span><br><span class="line">tableEnv.sqlQuery(&quot;SELECT a, word, length FROM MyTable LEFT JOIN LATERAL TABLE(split(a)) as T(word, length) ON TRUE&quot;);</span><br></pre></td></tr></table></figure>
+
+<p>&nbsp; &nbsp;需要注意的是PROJO类型不需要一个确定的字段顺序。意味着你不能使用as修改表函数返回的pojo的字段的名字。</p>
+<p>&nbsp; &nbsp;默认情况下TableFunction返回值类型是由flink类型抽取工具决定。对于基础类型及简单的POJOS是足够的，但是更复杂的类型，自定义类型，组合类型，会报错。这种情况下，返回值类型的TypeInformation，需要手动指定，方法是重载TableFunction#getResultType()。</p>
+<p>下面的例子，我们通过复写TableFunction#getResultType()方法使得表返回类型是RowTypeInfo(String, Integer)。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">public class CustomTypeSplit extends TableFunction&lt;Row&gt; &#123;</span><br><span class="line">  public void eval(String str) &#123;</span><br><span class="line">      for (String s : str.split(&quot; &quot;)) &#123;</span><br><span class="line">          Row row = new Row(2);</span><br><span class="line">          row.setField(0, s);</span><br><span class="line">          row.setField(1, s.length);</span><br><span class="line">          collect(row);</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  @Override</span><br><span class="line">  public TypeInformation&lt;Row&gt; getResultType() &#123;</span><br><span class="line">      return Types.ROW(Types.STRING(), Types.INT());</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="3-Aggregation-Functions-聚合函数"><a href="#3-Aggregation-Functions-聚合函数" class="headerlink" title="3.Aggregation Functions 聚合函数"></a>3.Aggregation Functions 聚合函数</h1><p>&nbsp; &nbsp;用户自定义聚合函数聚合一张表(一行或者多行，一行有一个或者多个属性)为一个标量的值。<br>[图片上传失败…(image-f5e972-1542542047386)]<br>上图中是讲的一张饮料的表这个表有是那个字段五行数据，现在要做的是求出所有饮料的最高价。</p>
+<p>&nbsp; &nbsp;聚合函数需要继承AggregateFunction。聚合函数工作方式如下：</p>
+<ul>
+<li><p>首先，需要一个accumulator，这个是保存聚合中间结果的数据结构。调用AggregateFunction函数的createAccumulator()方法来创建一个空accumulator.</p>
+</li>
+<li><p>随后，每个输入行都会调用accumulate()方法来更新accumulator。一旦所有的行被处理了，getValue()方法就会被调用，计算和返回最终的结果。</p>
+</li>
+</ul>
+<p>对于每个AggregateFunction，下面三个方法都是比不可少的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">createAccumulator()</span><br><span class="line"></span><br><span class="line">accumulate()</span><br><span class="line"></span><br><span class="line">getValue()</span><br></pre></td></tr></table></figure>
+
+<p>&nbsp; &nbsp;flink的类型抽取机制不能识别复杂的数据类型，比如，数据类型不是基础类型或者简单的pojos类型。所以，类似于ScalarFunction 和TableFunction，AggregateFunction提供了方法去指定返回结果类型的TypeInformation，用的是AggregateFunction#getResultType()。Accumulator类型用的是AggregateFunction#getAccumulatorType()。</p>
+<p>&nbsp; &nbsp;除了上面的方法，还有一些可选的方法。有些方法是让系统更加高效的执行查询，另外的一些在特定的场景下是必须的。例如，merge()方法在会话组窗口（session group window）上下文中是必须的。当一行数据是被视为跟两个回话窗口相关的时候，两个会话窗口的accumulators需要被join。</p>
+<p>AggregateFunction的下面几个方法，根据使用场景的不同需要被实现：</p>
+<ul>
+<li>retract()：在bounded OVER窗口的聚合方法中是需要实现的。</li>
+<li>merge()：在很多batch 聚合和会话窗口聚合是必须的。</li>
+<li>resetAccumulator(): 在大多数batch聚合是必须的。</li>
+</ul>
+<blockquote>
+<p>AggregateFunction的所有方法都是需要被声明为public，而不是static。定义聚合函数需要实现org.apache.flink.table.functions.AggregateFunction同时需要实现一个或者多个accumulate方法。该方法可以被重载为不同的数据类型，并且支持变参。</p>
+</blockquote>
+<p>&nbsp; &nbsp;为了计算加权平均值，累加器需要存储已累积的所有数据的加权和及计数。在栗子中定义一个WeightedAvgAccum类作为accumulator。尽管，retract(), merge(), 和resetAccumulator()方法在很多聚合类型是不需要的，这里也给出了栗子。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line">* Accumulator for WeightedAvg.</span><br><span class="line">*/</span><br><span class="line">public static class WeightedAvgAccum &#123;</span><br><span class="line">  public long sum = 0;</span><br><span class="line">  public int count = 0;</span><br><span class="line">&#125;</span><br><span class="line">/**</span><br><span class="line">* Weighted Average user-defined aggregate function.</span><br><span class="line">*/</span><br><span class="line">public static class WeightedAvg extends AggregateFunction&lt;Long, WeightedAvgAccum&gt; &#123;</span><br><span class="line">  @Override</span><br><span class="line">  public WeightedAvgAccum createAccumulator() &#123;</span><br><span class="line">    return new WeightedAvgAccum();</span><br><span class="line">  &#125;</span><br><span class="line">  @Override</span><br><span class="line">  public Long getValue(WeightedAvgAccum acc) &#123;</span><br><span class="line">      if (acc.count == 0) &#123;</span><br><span class="line">          return null;</span><br><span class="line">      &#125; else &#123;</span><br><span class="line">          return acc.sum / acc.count;</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  public void accumulate(WeightedAvgAccum acc, long iValue, int iWeight) &#123;</span><br><span class="line">      acc.sum += iValue * iWeight;</span><br><span class="line">      acc.count += iWeight;</span><br><span class="line">  &#125;</span><br><span class="line">  public void retract(WeightedAvgAccum acc, long iValue, int iWeight) &#123;</span><br><span class="line">      acc.sum -= iValue * iWeight;</span><br><span class="line">      acc.count -= iWeight;</span><br><span class="line">  &#125;</span><br><span class="line">  public void merge(WeightedAvgAccum acc, Iterable&lt;WeightedAvgAccum&gt; it) &#123;</span><br><span class="line">      Iterator&lt;WeightedAvgAccum&gt; iter = it.iterator();</span><br><span class="line">      while (iter.hasNext()) &#123;</span><br><span class="line">          WeightedAvgAccum a = iter.next();</span><br><span class="line">          acc.count += a.count;</span><br><span class="line">          acc.sum += a.sum;</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  public void resetAccumulator(WeightedAvgAccum acc) &#123;</span><br><span class="line">      acc.count = 0;</span><br><span class="line">      acc.sum = 0L;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">// register function</span><br><span class="line">StreamTableEnvironment tEnv = ...</span><br><span class="line">tEnv.registerFunction(&quot;wAvg&quot;, new WeightedAvg());</span><br><span class="line">// use function</span><br><span class="line"></span><br><span class="line">tEnv.sqlQuery(&quot;SELECT user, wAvg(points, level) AS avgPoints FROM userScores GROUP BY user&quot;);</span><br></pre></td></tr></table></figure>
+
+<h1 id="4-udf的最佳实践经验"><a href="#4-udf的最佳实践经验" class="headerlink" title="4.udf的最佳实践经验"></a>4.udf的最佳实践经验</h1><h2 id="4-1-Table-API和SQL"><a href="#4-1-Table-API和SQL" class="headerlink" title="4.1 Table API和SQL"></a>4.1 Table API和SQL</h2><p>&nbsp; &nbsp;代码生成器内部会尽可能多的尝试使用原生值。用户定义的函数可能通过对象创建、强制转换(casting)和拆装箱((un)boxing)引入大量开销。因此，强烈推荐参数和返回值的类型定义为原生类型而不是他们包装类型(boxing class)。Types.DATE 和Types.TIME可以用int代替。Types.TIMESTAMP可以用long代替。</p>
+<p>&nbsp; &nbsp;建议用户自定义函数使用java编写而不是scala编写，因为scala的类型可能会有不被flink类型抽取器兼容。</p>
+<h2 id="4-2-用Runtime集成UDFs"><a href="#4-2-用Runtime集成UDFs" class="headerlink" title="4.2 用Runtime集成UDFs"></a>4.2 用Runtime集成UDFs</h2><p>&nbsp; &nbsp;有时候udf需要获取全局runtime信息或者在进行实际工作之前做一些设置和清除工作，比如，打开数据库链接和关闭数据库链接。Udf提供了open()和close()方法，可以被复写，功能类似Dataset和DataStream API的RichFunction方法。</p>
+<p>&nbsp; &nbsp;Open()方法是在evaluation方法调用前调用一次。Close()是在evaluation方法最后一次调用后调用。Open()方法提共一个FunctionContext，FunctionContext包含了udf执行环境的上下文，比如，metric group，分布式缓存文件，全局的job参数。</p>
+<p>&nbsp; &nbsp;通过调用FunctionContext的相关方法，可以获取到相关的信息：</p>
+<ul>
+<li>getMetricGroup()并行子任务的指标组;</li>
+<li>getCachedFile(name)分布式缓存文件的本地副本;</li>
+<li>getJobParameter(name, defaultValue)给定key全局job参数;</li>
+</ul>
+<p>&nbsp; &nbsp;给出的例子就是通过FunctionContext在一个标量函数中获取全局job的参数。主要是实现获取redis的配置，然后简历redis链接，实现redis的交互的过程。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">import org.apache.flink.table.functions.FunctionContext;</span><br><span class="line">import org.apache.flink.table.functions.ScalarFunction;</span><br><span class="line">import redis.clients.jedis.Jedis;</span><br><span class="line">public class HashCode extends ScalarFunction &#123;</span><br><span class="line">  private int factor = 12;</span><br><span class="line">  Jedis jedis = null;</span><br><span class="line">  public HashCode() &#123;</span><br><span class="line">      super();</span><br><span class="line">  &#125;</span><br><span class="line">  @Override</span><br><span class="line">  public void open(FunctionContext context) throws Exception &#123;</span><br><span class="line">      super.open(context);</span><br><span class="line">      String redisHost = context.getJobParameter(&quot;redis.host&quot;,&quot;localhost&quot;);</span><br><span class="line">      int redisPort = Integer.valueOf(context.getJobParameter(&quot;redis.port&quot;,&quot;6379&quot;));</span><br><span class="line">      jedis = new Jedis(redisHost,redisPort);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public void close() throws Exception &#123;</span><br><span class="line">      super.close();</span><br><span class="line">      jedis.close();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public HashCode(int factor) &#123;</span><br><span class="line">      this.factor = factor;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public int eval(int s) &#123;</span><br><span class="line">      s = s % 3;</span><br><span class="line">      if(s == 2)</span><br><span class="line">          return Integer.valueOf(jedis.get(String.valueOf(s)));</span><br><span class="line">      else</span><br><span class="line">          return 0;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line">BatchTableEnvironment tableEnv = TableEnvironment.getTableEnvironment(env);</span><br><span class="line">// set job parameter</span><br><span class="line">Map&lt;String,String&gt; hashmap = new HashMap&lt;&gt;();</span><br><span class="line">       hashmap.put(&quot;redis.host&quot;,&quot;localhost&quot;);</span><br><span class="line">       hashmap.put(&quot;redis.port&quot;,&quot;6379&quot;);</span><br><span class="line">       ParameterTool parameter = ParameterTool.fromMap(hashmap);</span><br><span class="line">       exeEnv.getConfig().setGlobalJobParameters(parameter);</span><br><span class="line">// register the function</span><br><span class="line">tableEnv.registerFunction(&quot;hashCode&quot;, new HashCode());</span><br><span class="line">// use the function in Java Table API</span><br><span class="line">myTable.select(&quot;string, string.hashCode(), hashCode(string)&quot;);</span><br><span class="line">// use the function in SQL</span><br><span class="line">tableEnv.sqlQuery(&quot;SELECT string, HASHCODE(string) FROM MyTable&quot;);</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/wechat-qcode.jpg" alt="林夕_Yume wechat" style="width: 200px; max-width: 100%;">
+    <div>欢迎您订阅我的公众号!</div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持分享，您的支持是我创作的动力!</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="林夕_Yume 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/flink/" rel="tag"># flink</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/07/27/streaming102/" rel="next" title="google streaming102">
+                <i class="fa fa-chevron-left"></i> google streaming102
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/07/27/flinkUDFRegister/" rel="prev" title="Flink UDF 自动注册实践">
+                Flink UDF 自动注册实践 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/monkey.jpg" alt="林夕_Yume">
+            
+              <p class="site-author-name" itemprop="name">林夕_Yume</p>
+              <p class="site-description motion-element" itemprop="description">一个分享自己经历，感触以及工作成长的地方。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-Scalar-Functions-标量函数"><span class="nav-number">1.</span> <span class="nav-text">1.Scalar Functions 标量函数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-Table-Functions-表函数"><span class="nav-number">2.</span> <span class="nav-text">2.Table Functions 表函数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-Aggregation-Functions-聚合函数"><span class="nav-number">3.</span> <span class="nav-text">3.Aggregation Functions 聚合函数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-udf的最佳实践经验"><span class="nav-number">4.</span> <span class="nav-text">4.udf的最佳实践经验</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-Table-API和SQL"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 Table API和SQL</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-用Runtime集成UDFs"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 用Runtime集成UDFs</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">林夕_Yume</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="flink,yarn,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="flink on yarn 启动问题&amp;emsp;&amp;emsp;有两个月没发文了，这次在沉寂了两个月后带来的是我们在日常启动flink时大都会遇到的一个问题，不过也困扰了我断断续续有两天时间，后来在拨云见日之后发现豁然开朗的本质，其实，我们的解决问题时，有时候还是只浮于表面，而没有看到深藏冰面以下的那一角，所以继续努力是少不了的，那么切开问题，我们来从现象入手吧！ 1.flink启动现象&amp;emsp;&amp;">
+<meta name="keywords" content="flink,yarn">
+<meta property="og:type" content="article">
+<meta property="og:title" content="flink on yarn 启动源码分析">
+<meta property="og:url" content="http://yoursite.com/2019/07/27/flinkyarn/index.html">
+<meta property="og:site_name" content="林夕的部落格">
+<meta property="og:description" content="flink on yarn 启动问题&amp;emsp;&amp;emsp;有两个月没发文了，这次在沉寂了两个月后带来的是我们在日常启动flink时大都会遇到的一个问题，不过也困扰了我断断续续有两天时间，后来在拨云见日之后发现豁然开朗的本质，其实，我们的解决问题时，有时候还是只浮于表面，而没有看到深藏冰面以下的那一角，所以继续努力是少不了的，那么切开问题，我们来从现象入手吧！ 1.flink启动现象&amp;emsp;&amp;">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-e3e228bb58566a1c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-5a39d3467551c116.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-97fa061e27c9941f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-fd90b065232deca6.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-97fa061e27c9941f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-ec3168214a336550.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-8d294f8bf11bd67b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2019-07-27T02:07:14.157Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="flink on yarn 启动源码分析">
+<meta name="twitter:description" content="flink on yarn 启动问题&amp;emsp;&amp;emsp;有两个月没发文了，这次在沉寂了两个月后带来的是我们在日常启动flink时大都会遇到的一个问题，不过也困扰了我断断续续有两天时间，后来在拨云见日之后发现豁然开朗的本质，其实，我们的解决问题时，有时候还是只浮于表面，而没有看到深藏冰面以下的那一角，所以继续努力是少不了的，那么切开问题，我们来从现象入手吧！ 1.flink启动现象&amp;emsp;&amp;">
+<meta name="twitter:image" content="https://upload-images.jianshu.io/upload_images/13935362-e3e228bb58566a1c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/07/27/flinkyarn/">
+
+
+
+
+
+  <title>flink on yarn 启动源码分析 | 林夕的部落格</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">林夕的部落格</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">惟有不相忘，可抵岁月长！</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-schedule">
+          <a href="/schedule/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>
+            
+            日程表
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/27/flinkyarn/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="林夕_Yume">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/monkey.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="林夕的部落格">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">flink on yarn 启动源码分析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-07-27T10:07:14+08:00">
+                2019-07-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/实用技术/" itemprop="url" rel="index">
+                    <span itemprop="name">实用技术</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/实用技术/Flink/" itemprop="url" rel="index">
+                    <span itemprop="name">Flink</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="flink-on-yarn-启动问题"><a href="#flink-on-yarn-启动问题" class="headerlink" title="flink on yarn 启动问题"></a>flink on yarn 启动问题</h1><p>&emsp;&emsp;有两个月没发文了，这次在沉寂了两个月后带来的是我们在日常启动flink时大都会遇到的一个问题，不过也困扰了我断断续续有两天时间，后来在拨云见日之后发现豁然开朗的本质，其实，我们的解决问题时，有时候还是只浮于表面，而没有看到深藏冰面以下的那一角，所以继续努力是少不了的，那么切开问题，我们来从现象入手吧！</p>
+<h1 id="1-flink启动现象"><a href="#1-flink启动现象" class="headerlink" title="1.flink启动现象"></a>1.flink启动现象</h1><p>&emsp;&emsp;我们还在用flink on yarn，所以问题是在yarn上启动flink任务后，运行的vcores和containers还有taskManager数以及slot数和我们设置的大相径庭，在程序运行一会之后便又会回归正常，那么，究竟是什么原因产生的这种现象呢，下来我们先具体看下实际的案例。<br><img src="https://upload-images.jianshu.io/upload_images/13935362-e3e228bb58566a1c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="flink on yarn 0.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/13935362-5a39d3467551c116.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="flink on yarn 1.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/13935362-97fa061e27c9941f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="flink on yarn 2.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/13935362-fd90b065232deca6.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="flink on yarn 3.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/13935362-97fa061e27c9941f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="flink on yarn 4.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/13935362-ec3168214a336550.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="flink on yarn 5.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/13935362-8d294f8bf11bd67b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="flink shell.png"></p>
+<h2 id="1-1-问题介绍"><a href="#1-1-问题介绍" class="headerlink" title="1.1 问题介绍"></a>1.1 问题介绍</h2><p>&emsp;&emsp;实际任务中，我们设置的container为2个，每个container上的slot为2个，共计<strong>4个slot</strong>。而在yarn队列上实际运行时，我们的子队列最大5个container，9个vcore（内存暂没发现问题，此处我们不做介绍），而我们子队列上有其他任务运行时和只有我们当前任务运行时两种情况下，我们都进行了测试，下来，我们分情况介绍一下。</p>
+<h3 id="1-1-1-有其他任务"><a href="#1-1-1-有其他任务" class="headerlink" title="1.1.1 有其他任务"></a>1.1.1 有其他任务</h3><p>&emsp;&emsp;我们的4个任务都会占用3container和接近5个vcore,共计12container，19vcore（<em>这个估算我是觉得没看懂</em>），具体的队列情况，我们要去yarn队列这块分析下：</p>
+<ul>
+<li>总的资源为96vcores；</li>
+<li>非root队列分配36vcores；</li>
+<li>实时队列分配10vcores；</li>
+<li>我们此时这个队列分配9个vcores；</li>
+<li>说明实际占用的实时队列下的小队列资源已满。</li>
+</ul>
+<p>&emsp;&emsp;此时，我们通过yarnUI可以看出，我们的任务占用资源不多不少，正好3个container，5个vcores，没有多啊，我们先放下疑虑，看看只有该任务运行时的情况。</p>
+<h3 id="1-1-2-只有一个任务"><a href="#1-1-2-只有一个任务" class="headerlink" title="1.1.2 只有一个任务"></a>1.1.2 只有一个任务</h3><p>&emsp;&emsp;在只有当前任务运行时，那就很顺畅了，我们通过不停地F5可以发现，container、vcore从：<br>(1,1) -&gt; (2,3) -&gt; (3,5) -&gt; (4,7) -&gt; (5,9) -&gt; (4,7) -&gt; (3,5)， 这个变化很线性，实际上最大我们的任务占用了5个container和9个vcore，其中除过jobManager<br>和Appmaster占用的1个container1个vcore之外，等于我们有4个container，8个vcore，正常来说，这里面只有2个container，4个vcore是我们需要用的，<strong>多余的2个container，4个Vcores后来又被释放了</strong>，这是现象，至于这个问题的本质是什么，可能我这会能想到的有几种可能：</p>
+<ol>
+<li>我们的yarn队列上其他的资源被我们这个任务全部占用甚至超额占用；</li>
+<li>flink的jobManager在分配taskManager时，按照一定的机制来分配多余的资源。</li>
+</ol>
+<p>具体是什么原因呢，我们要通过下面第二章的源码走读来找到原因，下来，先审视一下我们的启动程序。</p>
+<h2 id="1-2-flink启动程序"><a href="#1-2-flink启动程序" class="headerlink" title="1.2 flink启动程序"></a>1.2 flink启动程序</h2><p>启动程序如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">/streaming/flink-1.6.0/bin/flink run  -s hdfs://hdfs/user/96490559/savepoint-fa82  -C </span><br><span class="line">file:/mnt/streaming/live/jars/mysql-connector-java-5.1.40.jar -n -m yarn-cluster -c com.scheduler  </span><br><span class="line">-yn 2 -ys 2 -p 4 -ytm 1024 -yqu KSC_27CF -ynm test_qa --yarnship /streaming/live/jars </span><br><span class="line">-d /streaming/live/streaming-dist-flink.jar</span><br></pre></td></tr></table></figure>
+
+<h1 id="2-源码分析"><a href="#2-源码分析" class="headerlink" title="2.源码分析"></a>2.源码分析</h1><p>首先，我们通过flink on yarn的客户端来看一下taskmanager及slot的设置：</p>
+<h2 id="2-1-设置相关参数"><a href="#2-1-设置相关参数" class="headerlink" title="2.1 设置相关参数"></a>2.1 设置相关参数</h2><h3 id="FlinkyarnSessionCli"><a href="#FlinkyarnSessionCli" class="headerlink" title="FlinkyarnSessionCli"></a>FlinkyarnSessionCli</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">private ClusterSpecification createClusterSpecification(Configuration configuration, CommandLine cmd) &#123;</span><br><span class="line">		if (cmd.hasOption(container.getOpt())) &#123; // number of containers is required option!</span><br><span class="line">			LOG.info(&quot;The argument &#123;&#125; is deprecated in will be ignored.&quot;, container.getOpt());</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		// TODO: The number of task manager should be deprecated soon</span><br><span class="line">		final int numberTaskManagers;</span><br><span class="line"></span><br><span class="line">		if (cmd.hasOption(container.getOpt())) &#123;</span><br><span class="line">		//通过cmd命令行中设置的container数来设置taskmananger数</span><br><span class="line">			numberTaskManagers = Integer.valueOf(cmd.getOptionValue(container.getOpt()));</span><br><span class="line">		&#125; else &#123;</span><br><span class="line">			numberTaskManagers = 1;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		// JobManager Memory</span><br><span class="line">		final int jobManagerMemoryMB = ConfigurationUtils.getJobManagerHeapMemory(configuration).getMebiBytes();</span><br><span class="line"></span><br><span class="line">		// Task Managers memory</span><br><span class="line">		final int taskManagerMemoryMB = ConfigurationUtils.getTaskManagerHeapMemory(configuration).getMebiBytes();</span><br><span class="line">        //按照我们每个taskmanager设置的vcore数设置slot数</span><br><span class="line">		int slotsPerTaskManager = configuration.getInteger(TaskManagerOptions.NUM_TASK_SLOTS);</span><br><span class="line"></span><br><span class="line">		return new ClusterSpecification.ClusterSpecificationBuilder()</span><br><span class="line">			.setMasterMemoryMB(jobManagerMemoryMB)</span><br><span class="line">			.setTaskManagerMemoryMB(taskManagerMemoryMB)</span><br><span class="line">			.setNumberTaskManagers(numberTaskManagers)</span><br><span class="line">			.setSlotsPerTaskManager(slotsPerTaskManager)</span><br><span class="line">			.createClusterSpecification();</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其次，我们从yarn集群的这个描述类来看具体资源获取这块的一些内容，包含Vcores和memory，这里我们需要关注的点是Vcores以及container的获取及设置。</p>
+<h3 id="AbstractYarnClusterDescriptor"><a href="#AbstractYarnClusterDescriptor" class="headerlink" title="AbstractYarnClusterDescriptor"></a>AbstractYarnClusterDescriptor</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">public ApplicationReport startAppMaster(</span><br><span class="line">			Configuration configuration,</span><br><span class="line">			String applicationName,</span><br><span class="line">			String yarnClusterEntrypoint,</span><br><span class="line">			JobGraph jobGraph,</span><br><span class="line">			YarnClient yarnClient,</span><br><span class="line">			YarnClientApplication yarnApplication,</span><br><span class="line">			ClusterSpecification clusterSpecification) throws Exception &#123;</span><br><span class="line">			</span><br><span class="line">//获取可用的最大核数</span><br><span class="line">final int numYarnMaxVcores;</span><br><span class="line">		try &#123;</span><br><span class="line">			numYarnMaxVcores = yarnClient.getNodeReports(NodeState.RUNNING)</span><br><span class="line">				.stream()</span><br><span class="line">				.mapToInt(report -&gt; report.getCapability().getVirtualCores())</span><br><span class="line">				.max()</span><br><span class="line">				.orElse(0);</span><br><span class="line">		&#125; catch (Exception e) &#123;</span><br><span class="line">			throw new YarnDeploymentException(&quot;Couldn&apos;t get cluster description, please check on the YarnConfiguration&quot;, e);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		int configuredVcores = flinkConfiguration.getInteger(YarnConfigOptions.VCORES, clusterSpecification.getSlotsPerTaskManager());</span><br><span class="line">		// 配置的核数应小于可用核数</span><br><span class="line">		if (configuredVcores &gt; numYarnMaxVcores) &#123;</span><br><span class="line">			throw new IllegalConfigurationException(</span><br><span class="line">				String.format(&quot;The number of requested virtual cores per node %d&quot; +</span><br><span class="line">						&quot; exceeds the maximum number of virtual cores %d available in the Yarn Cluster.&quot; +</span><br><span class="line">						&quot; Please note that the number of virtual cores is set to the number of task slots by default&quot; +</span><br><span class="line">						&quot; unless configured in the Flink config with &apos;%s.&apos;&quot;,</span><br><span class="line">					configuredVcores, numYarnMaxVcores, YarnConfigOptions.VCORES.key()));</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">ApplicationReport report = startAppMaster(</span><br><span class="line">			flinkConfiguration,</span><br><span class="line">			applicationName,</span><br><span class="line">			yarnClusterEntrypoint,</span><br><span class="line">			jobGraph,</span><br><span class="line">			yarnClient,</span><br><span class="line">			yarnApplication,</span><br><span class="line">			validClusterSpecification);</span><br><span class="line">			</span><br><span class="line">// Create application via yarnClient</span><br><span class="line">final YarnClientApplication yarnApplication = yarnClient.createApplication();</span><br><span class="line">final GetNewApplicationResponse appResponse = yarnApplication.getNewApplicationResponse();</span><br><span class="line">Resource maxRes = appResponse.getMaximumResourceCapability();</span><br><span class="line"></span><br><span class="line">final int yarnMinAllocationMB = yarnConfiguration.getInt(YarnConfiguration.RM_SCHEDULER_MINIMUM_ALLOCATION_MB, 0);			</span><br><span class="line"></span><br><span class="line">freeClusterMem = getCurrentFreeClusterResources(yarnClient);</span><br><span class="line"></span><br><span class="line">final ClusterSpecification validClusterSpecification;</span><br><span class="line">		try &#123;</span><br><span class="line">			validClusterSpecification = validateClusterResources(</span><br><span class="line">				clusterSpecification,</span><br><span class="line">				yarnMinAllocationMB,</span><br><span class="line">				maxRes,</span><br><span class="line">				freeClusterMem);</span><br><span class="line">		&#125; </span><br><span class="line">		</span><br><span class="line">		</span><br><span class="line">    // 设置Flink on YARN的相关配置</span><br><span class="line">	appMasterEnv.put(YarnConfigKeys.ENV_TM_COUNT, String.valueOf(clusterSpecification.getNumberTaskManagers()));//设置taskmanager数</span><br><span class="line">	appMasterEnv.put(YarnConfigKeys.ENV_TM_MEMORY, String.valueOf(clusterSpecification.getTaskManagerMemoryMB()));</span><br><span class="line">	appMasterEnv.put(YarnConfigKeys.FLINK_JAR_PATH, remotePathJar.toString());</span><br><span class="line">	appMasterEnv.put(YarnConfigKeys.ENV_APP_ID, appId.toString());</span><br><span class="line">	appMasterEnv.put(YarnConfigKeys.ENV_CLIENT_HOME_DIR, homeDir.toString());</span><br><span class="line">	appMasterEnv.put(YarnConfigKeys.ENV_CLIENT_SHIP_FILES, envShipFileList.toString());</span><br><span class="line">	appMasterEnv.put(YarnConfigKeys.ENV_SLOTS, String.valueOf(clusterSpecification.getSlotsPerTaskManager()));//设置每个taskmanager上的slot数</span><br><span class="line">	appMasterEnv.put(YarnConfigKeys.ENV_DETACHED, String.valueOf(detached));</span><br><span class="line">	appMasterEnv.put(YarnConfigKeys.ENV_ZOOKEEPER_NAMESPACE, getZookeeperNamespace());</span><br><span class="line">	appMasterEnv.put(YarnConfigKeys.FLINK_YARN_FILES, yarnFilesDir.toUri().toString());</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">public ApplicationReport startAppMaster(</span><br><span class="line">			Configuration configuration,</span><br><span class="line">			String applicationName,</span><br><span class="line">			String yarnClusterEntrypoint,</span><br><span class="line">			JobGraph jobGraph,</span><br><span class="line">			YarnClient yarnClient,</span><br><span class="line">			YarnClientApplication yarnApplication,</span><br><span class="line">			ClusterSpecification clusterSpecification) throws Exception &#123;</span><br><span class="line"></span><br><span class="line">		// ------------------ Initialize the file systems -------------------------</span><br><span class="line">		</span><br><span class="line">		</span><br><span class="line"></span><br><span class="line">		// initialize file system</span><br><span class="line">		// Copy the application master jar to the filesystem</span><br><span class="line">		// Create a local resource to point to the destination jar path</span><br><span class="line">		// hard coded check for the GoogleHDFS client because its not overriding the getScheme() method.</span><br><span class="line">		</span><br><span class="line">		......</span><br><span class="line">		</span><br><span class="line">		// Setup jar for ApplicationMaster</span><br><span class="line">		Path remotePathJar = setupSingleLocalResource(</span><br><span class="line">			&quot;flink.jar&quot;,</span><br><span class="line">			fs,</span><br><span class="line">			appId,</span><br><span class="line">			flinkJarPath,</span><br><span class="line">			localResources,</span><br><span class="line">			homeDir,</span><br><span class="line">			&quot;&quot;);</span><br><span class="line"></span><br><span class="line">		// 为TaskManager设置相关参数，是针对总的slot和每个TaskManager上的slot数来设置</span><br><span class="line">		configuration.setInteger(</span><br><span class="line">		</span><br><span class="line">			TaskManagerOptions.NUM_TASK_SLOTS,</span><br><span class="line">			clusterSpecification.getSlotsPerTaskManager()</span><br><span class="line">			);</span><br><span class="line"></span><br><span class="line">		configuration.setString(</span><br><span class="line">			TaskManagerOptions.TASK_MANAGER_HEAP_MEMORY,</span><br><span class="line">			clusterSpecification.getTaskManagerMemoryMB() + &quot;m&quot;);</span><br><span class="line">			</span><br><span class="line">			......</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="TaskManagerOptions"><a href="#TaskManagerOptions" class="headerlink" title="TaskManagerOptions"></a>TaskManagerOptions</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">@Documentation.CommonOption(position = Documentation.CommonOption.POSITION_PARALLELISM_SLOTS)</span><br><span class="line">// 此处的slot数为我们operator中的并行度数，是每个TaskManager上可运行slot的数，默认值1，我们的Vcores设置为每个TaskManager为2，所以该值也为2</span><br><span class="line">public static final ConfigOption&lt;Integer&gt; NUM_TASK_SLOTS =</span><br><span class="line">	key(&quot;taskmanager.numberOfTaskSlots&quot;)</span><br><span class="line">		.defaultValue(1)</span><br><span class="line">		.withDescription(&quot;The number of parallel operator or user function instances that a single TaskManager can&quot; +</span><br><span class="line">			&quot; run. If this value is larger than 1, a single TaskManager takes multiple instances of a function or&quot; +</span><br><span class="line">			&quot; operator. That way, the TaskManager can utilize multiple CPU cores, but at the same time, the&quot; +</span><br><span class="line">			&quot; available memory is divided between the different operator or function instances. This value&quot; +</span><br><span class="line">			&quot; is typically proportional to the number of physical CPU cores that the TaskManager&apos;s machine has&quot; +</span><br><span class="line">			&quot; (e.g., equal to the number of cores, or half the number of cores).&quot;);</span><br><span class="line"></span><br><span class="line">   //设置taskManager的堆内存大小，默认为1G</span><br><span class="line">/**</span><br><span class="line"> * JVM heap size for the TaskManagers with memory size.</span><br><span class="line"> */</span><br><span class="line">@Documentation.CommonOption(position = Documentation.CommonOption.POSITION_MEMORY)</span><br><span class="line">public static final ConfigOption&lt;String&gt; TASK_MANAGER_HEAP_MEMORY =</span><br><span class="line">		key(&quot;taskmanager.heap.size&quot;)</span><br><span class="line">		.defaultValue(&quot;1024m&quot;)</span><br><span class="line">		.withDescription(&quot;JVM heap size for the TaskManagers, which are the parallel workers of&quot; +</span><br><span class="line">				&quot; the system. On YARN setups, this value is automatically configured to the size of the TaskManager&apos;s&quot; +</span><br><span class="line">				&quot; YARN container, minus a certain tolerance value.&quot;);</span><br></pre></td></tr></table></figure>
+
+<p>在我们flink的job运行中，jobmanager负责执行单个flink作业图，它里面针对单个graph有相关的资源申请和释放的相关方法，下来我们具体看一下。</p>
+<h3 id="JobMaster"><a href="#JobMaster" class="headerlink" title="JobMaster"></a>JobMaster</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// 初始化4个taskManager,这里是？？？</span><br><span class="line">this.registeredTaskManagers = new HashMap&lt;&gt;(4);</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">//申请taskManager资源</span><br><span class="line">@Override</span><br><span class="line">	public CompletableFuture&lt;Collection&lt;SlotOffer&gt;&gt; offerSlots(</span><br><span class="line">			final ResourceID taskManagerId,</span><br><span class="line">			final Collection&lt;SlotOffer&gt; slots,</span><br><span class="line">			final Time timeout) &#123;</span><br><span class="line"></span><br><span class="line">		Tuple2&lt;TaskManagerLocation, TaskExecutorGateway&gt; taskManager = registeredTaskManagers.get(taskManagerId);</span><br><span class="line"></span><br><span class="line">		if (taskManager == null) &#123;</span><br><span class="line">			return FutureUtils.completedExceptionally(new Exception(&quot;Unknown TaskManager &quot; + taskManagerId));</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		final TaskManagerLocation taskManagerLocation = taskManager.f0;</span><br><span class="line">		final TaskExecutorGateway taskExecutorGateway = taskManager.f1;</span><br><span class="line"></span><br><span class="line">		final RpcTaskManagerGateway rpcTaskManagerGateway = new RpcTaskManagerGateway(taskExecutorGateway, getFencingToken());</span><br><span class="line"></span><br><span class="line">		return slotPoolGateway.offerSlots(</span><br><span class="line">			taskManagerLocation,</span><br><span class="line">			rpcTaskManagerGateway,</span><br><span class="line">			slots);</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">public CompletableFuture&lt;SerializedInputSplit&gt; requestNextInputSplit(</span><br><span class="line">		final JobVertexID vertexID,</span><br><span class="line">		final ExecutionAttemptID executionAttempt) &#123;</span><br><span class="line"></span><br><span class="line">       //获取执行图的执行单元</span><br><span class="line">	final Execution execution = executionGraph.getRegisteredExecutions().get(executionAttempt);</span><br><span class="line">	if (execution == null) &#123;</span><br><span class="line">	......</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	final ExecutionJobVertex vertex = executionGraph.getJobVertex(vertexID);</span><br><span class="line">	if (vertex == null) &#123;</span><br><span class="line">		......</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	final InputSplitAssigner splitAssigner = vertex.getSplitAssigner();</span><br><span class="line">	if (splitAssigner == null) &#123;</span><br><span class="line">		......</span><br><span class="line">	&#125;</span><br><span class="line">       //通过执行单元来获取slot和taskId</span><br><span class="line">	final LogicalSlot slot = execution.getAssignedResource();</span><br><span class="line">	final int taskId = execution.getVertex().getParallelSubtaskIndex();</span><br><span class="line">	final String host = slot != null ? slot.getTaskManagerLocation().getHostname() : null;</span><br><span class="line">	final InputSplit nextInputSplit = splitAssigner.getNextInputSplit(host, taskId);</span><br><span class="line"></span><br><span class="line">	try &#123;</span><br><span class="line">	    //将切分好的输入序列化成对象</span><br><span class="line">		final byte[] serializedInputSplit = InstantiationUtil.serializeObject(nextInputSplit);</span><br><span class="line">		return CompletableFuture.completedFuture(new SerializedInputSplit(serializedInputSplit));</span><br><span class="line">	&#125; catch (Exception ex) &#123;</span><br><span class="line">	......</span><br><span class="line">		return FutureUtils.completedExceptionally(reason);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="FlinkresourceManager"><a href="#FlinkresourceManager" class="headerlink" title="FlinkresourceManager"></a>FlinkresourceManager</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">   // 此方法使资源框架主框架同步，重新检查可用的和挂起的worker容器集，并在需要时分配容器。</span><br><span class="line">   //这个方法不会自动释放worker，因为对于这个资源管理器，哪个worker可以被释放是不可见的。</span><br><span class="line">   //相反，JobManager必须显式地释放单个worker</span><br><span class="line">private void checkWorkersPool() &#123;</span><br><span class="line">	int numWorkersPending = getNumWorkerRequestsPending();</span><br><span class="line">	int numWorkersPendingRegistration = getNumWorkersPendingRegistration();</span><br><span class="line"></span><br><span class="line">	// sanity checks</span><br><span class="line">	Preconditions.checkState(numWorkersPending &gt;= 0,</span><br><span class="line">		&quot;Number of pending workers should never be below 0.&quot;);</span><br><span class="line">	Preconditions.checkState(numWorkersPendingRegistration &gt;= 0,</span><br><span class="line">		&quot;Number of pending workers pending registration should never be below 0.&quot;);</span><br><span class="line"></span><br><span class="line">	// see how many workers we want, and whether we have enough</span><br><span class="line">	int allAvailableAndPending = startedWorkers.size() +</span><br><span class="line">		numWorkersPending + numWorkersPendingRegistration;</span><br><span class="line">       //resourcemanager设置taskmanager数 --&gt;&gt; 池子大小 —（开始的+挂起的+已注册的）</span><br><span class="line">	int missing = designatedPoolSize - allAvailableAndPending;</span><br><span class="line"></span><br><span class="line">	if (missing &gt; 0) &#123;</span><br><span class="line">		requestNewWorkers(missing);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="YarnFlinkresourceManager"><a href="#YarnFlinkresourceManager" class="headerlink" title="YarnFlinkresourceManager"></a>YarnFlinkresourceManager</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">protected void requestNewWorkers(int numWorkers) &#123;</span><br><span class="line">	final long mem = taskManagerParameters.taskManagerTotalMemoryMB();</span><br><span class="line">	final int containerMemorySizeMB;</span><br><span class="line"></span><br><span class="line">	if (mem &lt;= Integer.MAX_VALUE) &#123;</span><br><span class="line">		containerMemorySizeMB = (int) mem;</span><br><span class="line">	&#125; else &#123;</span><br><span class="line">		containerMemorySizeMB = Integer.MAX_VALUE;</span><br><span class="line">		LOG.error(&quot;Decreasing container size from &#123;&#125; MB to &#123;&#125; MB (integer value overflow)&quot;,</span><br><span class="line">			mem, containerMemorySizeMB);</span><br><span class="line">	&#125;</span><br><span class="line">       //遍历taskmanager，然后资源管理客户端 添加资源请求申请</span><br><span class="line">	for (int i = 0; i &lt; numWorkers; i++) &#123;</span><br><span class="line">		numPendingContainerRequests++;</span><br><span class="line">		LOG.info(&quot;Requesting new TaskManager container with &#123;&#125; megabytes memory. Pending requests: &#123;&#125;&quot;,</span><br><span class="line">			containerMemorySizeMB, numPendingContainerRequests);</span><br><span class="line"></span><br><span class="line">		// Priority for worker containers - priorities are intra-application</span><br><span class="line">		Priority priority = Priority.newInstance(0);</span><br><span class="line"></span><br><span class="line">		// Resource requirements for worker containers</span><br><span class="line">		int taskManagerSlots = taskManagerParameters.numSlots();</span><br><span class="line">		int vcores = config.getInteger(YarnConfigOptions.VCORES, Math.max(taskManagerSlots, 1));</span><br><span class="line">		Resource capability = Resource.newInstance(containerMemorySizeMB, vcores);</span><br><span class="line"></span><br><span class="line">		resourceManagerClient.addContainerRequest(</span><br><span class="line">			new AMRMClient.ContainerRequest(capability, null, null, priority));</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	// make sure we transmit the request fast and receive fast news of granted allocations</span><br><span class="line">	resourceManagerClient.setHeartbeatInterval(FAST_YARN_HEARTBEAT_INTERVAL_MS);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">// ------------------------------------------------------------------------</span><br><span class="line">//  </span><br><span class="line">// ------------------------------------------------------------------------</span><br><span class="line">private void containersAllocated(List&lt;Container&gt; containers) &#123;</span><br><span class="line">    //得到我们需要的和已注册的TaskManager</span><br><span class="line">	final int numRequired = getDesignatedWorkerPoolSize();</span><br><span class="line">	final int numRegistered = getNumberOfStartedTaskManagers();</span><br><span class="line"></span><br><span class="line">	for (Container container : containers) &#123;</span><br><span class="line">		numPendingContainerRequests = Math.max(0, numPendingContainerRequests - 1);</span><br><span class="line">	</span><br><span class="line"></span><br><span class="line">		// 判断是否返回container，是否启动TaskManager</span><br><span class="line">		if (numRegistered + containersInLaunch.size() &lt; numRequired) &#123;</span><br><span class="line">		</span><br><span class="line">			// 启动TaskManager</span><br><span class="line">			final YarnContainerInLaunch containerInLaunch = new YarnContainerInLaunch(container);</span><br><span class="line">			final ResourceID resourceID = containerInLaunch.getResourceID();</span><br><span class="line">			containersInLaunch.put(resourceID, containerInLaunch);</span><br><span class="line">               ......</span><br><span class="line">               </span><br><span class="line">			try &#123;</span><br><span class="line">				// 设置一个特殊的环境变量来唯一标识container</span><br><span class="line">				taskManagerLaunchContext.getEnvironment()</span><br><span class="line">					.put(ENV_FLINK_CONTAINER_ID, resourceID.getResourceIdString());</span><br><span class="line">				nodeManagerClient.startContainer(container, taskManagerLaunchContext);</span><br><span class="line">			&#125;</span><br><span class="line">			catch (Throwable t) &#123;</span><br><span class="line">				// failed to launch the container</span><br><span class="line">				containersInLaunch.remove(resourceID);</span><br><span class="line"></span><br><span class="line">				// return container, a new one will be requested eventually</span><br><span class="line">			......</span><br><span class="line">				containersBeingReturned.put(container.getId(), container);</span><br><span class="line">				resourceManagerClient.releaseAssignedContainer(container.getId());</span><br><span class="line">			&#125;</span><br><span class="line">		&#125; else &#123;</span><br><span class="line">			// 返回过多的container并释放资源</span><br><span class="line">			containersBeingReturned.put(container.getId(), container);</span><br><span class="line">			resourceManagerClient.releaseAssignedContainer(container.getId());</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	updateProgress();</span><br><span class="line"></span><br><span class="line">	// 如果我们不等待其他容器，我们可以使用常规的心跳</span><br><span class="line">	if (numPendingContainerRequests &lt;= 0) &#123;</span><br><span class="line">		resourceManagerClient.setHeartbeatInterval(yarnHeartbeatIntervalMillis);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	// 确保我们再次检查worker或容器的状态至少一次，以防一些容器不能正常工作</span><br><span class="line">	triggerCheckWorkers();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-2-释放多余资源"><a href="#2-2-释放多余资源" class="headerlink" title="2.2 释放多余资源"></a>2.2 释放多余资源</h2><h3 id="JobMaster-1"><a href="#JobMaster-1" class="headerlink" title="JobMaster"></a>JobMaster</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">//释放空余的资源</span><br><span class="line">private CompletableFuture&lt;Acknowledge&gt; releaseEmptyTaskManager(ResourceID resourceId) &#123;</span><br><span class="line">		return disconnectTaskManager(resourceId, new FlinkException(String.format(&quot;No more slots registered at JobMaster %s.&quot;, resourceId)));</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">public CompletableFuture&lt;Acknowledge&gt; disconnectTaskManager(final ResourceID resourceID, final Exception cause) &#123;</span><br><span class="line">	log.debug(&quot;Disconnect TaskExecutor &#123;&#125; because: &#123;&#125;&quot;, resourceID, cause.getMessage());</span><br><span class="line"></span><br><span class="line">	taskManagerHeartbeatManager.unmonitorTarget(resourceID);</span><br><span class="line">	//1.slotPool先按照id释放多余的slot资源</span><br><span class="line">	CompletableFuture&lt;Acknowledge&gt; releaseFuture = slotPoolGateway.releaseTaskManager(resourceID, cause);</span><br><span class="line">       //2.已注册的TaskManager再去取消多余的taskManager</span><br><span class="line">	Tuple2&lt;TaskManagerLocation, TaskExecutorGateway&gt; taskManagerConnection = registeredTaskManagers.remove(resourceID);</span><br><span class="line"></span><br><span class="line">	if (taskManagerConnection != null) &#123;</span><br><span class="line">		taskManagerConnection.f1.disconnectJobManager(jobGraph.getJobID(), cause);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	return releaseFuture;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="SlotPool"><a href="#SlotPool" class="headerlink" title="SlotPool"></a>SlotPool</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">	public CompletableFuture&lt;Acknowledge&gt; releaseTaskManager(final ResourceID resourceId, final Exception cause) &#123;</span><br><span class="line">		if (registeredTaskManagers.remove(resourceId)) &#123;</span><br><span class="line">			releaseTaskManagerInternal(resourceId, cause);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		return CompletableFuture.completedFuture(Acknowledge.get());</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	</span><br><span class="line">private void releaseTaskManagerInternal(final ResourceID resourceId, final Exception cause) &#123;</span><br><span class="line">		final Set&lt;AllocatedSlot&gt; removedSlots = new HashSet&lt;&gt;(allocatedSlots.removeSlotsForTaskManager(resourceId));</span><br><span class="line"></span><br><span class="line">        //具体如何去释放</span><br><span class="line">        //1.先触发指定负载的释放（如果有效载荷可以释放，然后从slot中取出）</span><br><span class="line">		for (AllocatedSlot allocatedSlot : removedSlots) &#123;</span><br><span class="line">			allocatedSlot.releasePayload(cause);</span><br><span class="line">		&#125;</span><br><span class="line">        //2.将需要移除的TaskManager上的slot添加到对应的类中</span><br><span class="line">		removedSlots.addAll(availableSlots.removeAllForTaskManager(resourceId));</span><br><span class="line">        //3.移除slot</span><br><span class="line">		for (AllocatedSlot removedSlot : removedSlots) &#123;</span><br><span class="line">			TaskManagerGateway taskManagerGateway = removedSlot.getTaskManagerGateway();</span><br><span class="line">			taskManagerGateway.freeSlot(removedSlot.getAllocationId(), cause, rpcTimeout);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="RpcTaskManagerGateway"><a href="#RpcTaskManagerGateway" class="headerlink" title="RpcTaskManagerGateway"></a>RpcTaskManagerGateway</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">	public CompletableFuture&lt;Acknowledge&gt; freeSlot(AllocationID allocationId, Throwable cause, Time timeout) &#123;</span><br><span class="line">	    //移除slot</span><br><span class="line">		return taskExecutorGateway.freeSlot(</span><br><span class="line">			allocationId,</span><br><span class="line">			cause,</span><br><span class="line">			timeout);</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="TaskExecutor"><a href="#TaskExecutor" class="headerlink" title="TaskExecutor"></a>TaskExecutor</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">	public CompletableFuture&lt;Acknowledge&gt; freeSlot(AllocationID allocationId, Throwable cause, Time timeout) &#123;</span><br><span class="line">	    //取消空闲的taskManager</span><br><span class="line">		freeSlotInternal(allocationId, cause);</span><br><span class="line"></span><br><span class="line">		return CompletableFuture.completedFuture(Acknowledge.get());</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">private void freeSlotInternal(AllocationID allocationId, Throwable cause) &#123;</span><br><span class="line">		checkNotNull(allocationId);</span><br><span class="line"></span><br><span class="line">		log.debug(&quot;Free slot with allocation id &#123;&#125; because: &#123;&#125;&quot;, allocationId, cause.getMessage());</span><br><span class="line"></span><br><span class="line">		try &#123;</span><br><span class="line">			final JobID jobId = taskSlotTable.getOwningJob(allocationId);</span><br><span class="line"></span><br><span class="line">			final int slotIndex = taskSlotTable.freeSlot(allocationId, cause);</span><br><span class="line"></span><br><span class="line">			if (slotIndex != -1) &#123;</span><br><span class="line"></span><br><span class="line">				if (isConnectedToResourceManager()) &#123;</span><br><span class="line">					// the slot was freed. Tell the RM about it</span><br><span class="line">					ResourceManagerGateway resourceManagerGateway = establishedResourceManagerConnection.getResourceManagerGateway();</span><br><span class="line"></span><br><span class="line">					resourceManagerGateway.notifySlotAvailable(</span><br><span class="line">						establishedResourceManagerConnection.getTaskExecutorRegistrationId(),</span><br><span class="line">						new SlotID(getResourceID(), slotIndex),</span><br><span class="line">						allocationId);</span><br><span class="line">				&#125;</span><br><span class="line"></span><br><span class="line">				if (jobId != null) &#123;</span><br><span class="line">					// check whether we still have allocated slots for the same job</span><br><span class="line">					if (taskSlotTable.getAllocationIdsPerJob(jobId).isEmpty()) &#123;</span><br><span class="line">					</span><br><span class="line">						try &#123;</span><br><span class="line">						    //通过jobLeader服务移除job</span><br><span class="line">							jobLeaderService.removeJob(jobId);</span><br><span class="line">						&#125; catch (Exception e) &#123;</span><br><span class="line">							log.info(&quot;Could not remove job &#123;&#125; from JobLeaderService.&quot;, jobId, e);</span><br><span class="line">						&#125;</span><br><span class="line">                        //关闭与jobManager的连接</span><br><span class="line">						closeJobManagerConnection(</span><br><span class="line">							jobId,</span><br><span class="line">							new FlinkException(&quot;TaskExecutor &quot; + getAddress() +</span><br><span class="line">								&quot; has no more allocated slots for job &quot; + jobId + &apos;.&apos;));</span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125; catch (SlotNotFoundException e) &#123;</span><br><span class="line">			log.debug(&quot;Could not free slot for allocation id &#123;&#125;.&quot;, allocationId, e);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		localStateStoresManager.releaseLocalStateForAllocationId(allocationId);</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<p>&emsp;&emsp;启动时候会根据提交作业最后生成的ExecutionGraph的并发度（也就是作业可运行的最大并行度，即可用资源数）来向resourceManager申请slot，<br>然后resourceManager就会启动container <yn> slot<ys>  memory &lt;-ytm&gt;，最后ExecutionGraph切分的（map1,map2,map3…）在各个slot部署启动，多余的没用到的container就会被关闭。</ys></yn></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/wechat-qcode.jpg" alt="林夕_Yume wechat" style="width: 200px; max-width: 100%;">
+    <div>欢迎您订阅我的公众号!</div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持分享，您的支持是我创作的动力!</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="林夕_Yume 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/flink/" rel="tag"># flink</a>
+          
+            <a href="/tags/yarn/" rel="tag"># yarn</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/07/27/flinkUDFRegister/" rel="next" title="Flink UDF 自动注册实践">
+                <i class="fa fa-chevron-left"></i> Flink UDF 自动注册实践
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/07/27/flinkstateevolution/" rel="prev" title="Flink 1.7 State Evolution">
+                Flink 1.7 State Evolution <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/monkey.jpg" alt="林夕_Yume">
+            
+              <p class="site-author-name" itemprop="name">林夕_Yume</p>
+              <p class="site-description motion-element" itemprop="description">一个分享自己经历，感触以及工作成长的地方。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#flink-on-yarn-启动问题"><span class="nav-number">1.</span> <span class="nav-text">flink on yarn 启动问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-flink启动现象"><span class="nav-number">2.</span> <span class="nav-text">1.flink启动现象</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-问题介绍"><span class="nav-number">2.1.</span> <span class="nav-text">1.1 问题介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-1-有其他任务"><span class="nav-number">2.1.1.</span> <span class="nav-text">1.1.1 有其他任务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-2-只有一个任务"><span class="nav-number">2.1.2.</span> <span class="nav-text">1.1.2 只有一个任务</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-flink启动程序"><span class="nav-number">2.2.</span> <span class="nav-text">1.2 flink启动程序</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-源码分析"><span class="nav-number">3.</span> <span class="nav-text">2.源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-设置相关参数"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 设置相关参数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#FlinkyarnSessionCli"><span class="nav-number">3.1.1.</span> <span class="nav-text">FlinkyarnSessionCli</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AbstractYarnClusterDescriptor"><span class="nav-number">3.1.2.</span> <span class="nav-text">AbstractYarnClusterDescriptor</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TaskManagerOptions"><span class="nav-number">3.1.3.</span> <span class="nav-text">TaskManagerOptions</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JobMaster"><span class="nav-number">3.1.4.</span> <span class="nav-text">JobMaster</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FlinkresourceManager"><span class="nav-number">3.1.5.</span> <span class="nav-text">FlinkresourceManager</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#YarnFlinkresourceManager"><span class="nav-number">3.1.6.</span> <span class="nav-text">YarnFlinkresourceManager</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-释放多余资源"><span class="nav-number">3.2.</span> <span class="nav-text">2.2 释放多余资源</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#JobMaster-1"><span class="nav-number">3.2.1.</span> <span class="nav-text">JobMaster</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SlotPool"><span class="nav-number">3.2.2.</span> <span class="nav-text">SlotPool</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RpcTaskManagerGateway"><span class="nav-number">3.2.3.</span> <span class="nav-text">RpcTaskManagerGateway</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TaskExecutor"><span class="nav-number">3.2.4.</span> <span class="nav-text">TaskExecutor</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">林夕_Yume</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

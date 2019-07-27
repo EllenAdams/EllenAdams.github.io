@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="flink,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="1.状态schema演变Apache Flink流应用程序通常设计为无限期或长时间运行。对于所有长期运行的服务，需要更新应用程序以适应不断变化的需求。对于应用程序所针对的数据schema也是如此;它们随着应用程序的发展而发展。 本章概述了如何演进状态类型的数据schema。当前的限制因不同类型和state结构(ValueState、ListState等)而不同。需要注意的是，只有在使用由Flink">
+<meta name="keywords" content="flink">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flink 1.7 State Evolution">
+<meta property="og:url" content="http://yoursite.com/2019/07/27/flinkstateevolution/index.html">
+<meta property="og:site_name" content="林夕的部落格">
+<meta property="og:description" content="1.状态schema演变Apache Flink流应用程序通常设计为无限期或长时间运行。对于所有长期运行的服务，需要更新应用程序以适应不断变化的需求。对于应用程序所针对的数据schema也是如此;它们随着应用程序的发展而发展。 本章概述了如何演进状态类型的数据schema。当前的限制因不同类型和state结构(ValueState、ListState等)而不同。需要注意的是，只有在使用由Flink">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-07-27T02:08:05.715Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flink 1.7 State Evolution">
+<meta name="twitter:description" content="1.状态schema演变Apache Flink流应用程序通常设计为无限期或长时间运行。对于所有长期运行的服务，需要更新应用程序以适应不断变化的需求。对于应用程序所针对的数据schema也是如此;它们随着应用程序的发展而发展。 本章概述了如何演进状态类型的数据schema。当前的限制因不同类型和state结构(ValueState、ListState等)而不同。需要注意的是，只有在使用由Flink">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/07/27/flinkstateevolution/">
+
+
+
+
+
+  <title>Flink 1.7 State Evolution | 林夕的部落格</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">林夕的部落格</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">惟有不相忘，可抵岁月长！</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-schedule">
+          <a href="/schedule/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>
+            
+            日程表
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/27/flinkstateevolution/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="林夕_Yume">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/monkey.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="林夕的部落格">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Flink 1.7 State Evolution</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-07-27T10:08:05+08:00">
+                2019-07-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/实用技术/" itemprop="url" rel="index">
+                    <span itemprop="name">实用技术</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/实用技术/Flink/" itemprop="url" rel="index">
+                    <span itemprop="name">Flink</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="1-状态schema演变"><a href="#1-状态schema演变" class="headerlink" title="1.状态schema演变"></a>1.状态schema演变</h1><p>Apache Flink流应用程序通常设计为无限期或长时间运行。对于所有长期运行的服务，需要更新应用程序以适应不断变化的需求。对于应用程序所针对的数据schema也是如此;它们随着应用程序的发展而发展。</p>
+<p>本章概述了如何演进状态类型的数据schema。当前的限制因不同类型和state结构(ValueState、ListState等)而不同。需要注意的是，<a href="https://ci.apache.org/projects/flink/flink-docs-master/dev/types_serialization.html" target="_blank" rel="noopener">只有在使用由Flink自己的类型序列化框架生成的状态序列化器时</a>，本章所述的信息才是与其相关的。也就是说，在声明状态时，所提供的状态描述符没有配置使用特定的类型序列化器或类型信息，在这种情况下，Flink会推断出关于状态类型的信息:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ListStateDescriptor&lt;MyPojoType&gt; descriptor =</span><br><span class="line">    new ListStateDescriptor&lt;&gt;(</span><br><span class="line">        &quot;state-name&quot;,</span><br><span class="line">        MyPojoType.class);</span><br><span class="line"></span><br><span class="line">checkpointedState = getRuntimeContext().getListState(descriptor);</span><br></pre></td></tr></table></figure>
+
+<p>实际上，状态schema是否可以演化取决于用于读写持久状态字节的序列化器。简单地说，注册状态的schema只有在其序列化器正确支持它的情况下才能演化。这是由Flink类型序列化框架生成的序列化器透明地处理的(当前支持仅avro类型)。</p>
+<p>如果你打算为你的状态类型实现自定义类型序列化器，并且想了解如何实现该序列化器以支持状态schema演化，请参阅<strong><em>自定义状态序列化</em></strong>一节内容。该节还包括关于状态序列化器和Flink的状态后端之间相互作用的必要内部细节，以支持状态schema演化。</p>
+<h2 id="1-1-演化状态schema"><a href="#1-1-演化状态schema" class="headerlink" title="1.1 演化状态schema"></a>1.1 演化状态schema</h2><p>要演化给定状态类型的schema，可以采取以下步骤:</p>
+<ol>
+<li>为Flink流作业创建一个savepoint；</li>
+<li>更新应用程序中的状态类型(例如，修改Avro类型schema)；</li>
+<li>从savepoint恢复作业。在第一次访问状态时，Flink将评估schema是否根据状态而改变，并在必要时迁移状态schema。</li>
+</ol>
+<p>为适应更改的schema而迁移状态的过程自动地、独立地针对每个状态来进行。这个过程由Flink在内部执行，首先检查状态的新序列化器是否具有与前一个序列化器不同的序列化schema;如果是，则使用前面的序列化器将状态读入对象，并使用新的序列化器再次将状态写入字节。<br>关于迁移过程的更多细节超出了本文档的范围;请参考<strong>自定义状态序列化</strong>。</p>
+<h2 id="1-2-状态schema支持的数据类型"><a href="#1-2-状态schema支持的数据类型" class="headerlink" title="1.2 状态schema支持的数据类型"></a>1.2 状态schema支持的数据类型</h2><p>目前，schema演化仅支持Avro。因此，如果关心状态的schema演化的话，目前建议始终对状态数据类型使用Avro。<br>计划扩展对更多复合类型(如pojo)的支持;详情请参考<a href="https://issues.apache.org/jira/browse/FLINK-10897" target="_blank" rel="noopener">FLINK-10897</a>。</p>
+<p><strong>Avro类型</strong></p>
+<p>Flink完全支持Avro类型状态的演进模式，只要<a href="http://avro.apache.org/docs/current/spec.html#Schema+Resolution" target="_blank" rel="noopener">Avro的schema解析规则</a>认为是与其相兼容的schema更改即可。</p>
+<p>目前存在的一个限制是，当作业恢复时，Avro生成的用作状态类型的类不能被重新定位或具有不同的名称空间。</p>
+<h1 id="2-自定义状态序列化"><a href="#2-自定义状态序列化" class="headerlink" title="2.自定义状态序列化"></a>2.自定义状态序列化</h1><p>在Flink 1.7之前，序列化器快照是作为TypeSerializerConfigSnapshot实现的(现在已经弃用了，将来会被删除，完全由1.7中引入的新TypeSerializerSnapshot接口替代)。此外，序列化器模式兼容性检查的职责存在于TypeSerializer中，在TypeSerializer#ensureCompatibility(TypeSerializerConfigSnapshot)方法中实现。</p>
+<p>为了避免将来的问题，并具有迁移状态序列化器和schema的灵活性，强烈建议从旧的抽象迁移。详细信息和迁移指南我们现在开始。</p>
+<p>此章节目标是为需要对其状态使用自定义序列化的用户提供指导方针，包括如何提供自定义状态序列化器，以及实现允许状态模式演化的序列化器的指导方针和最佳实践。<br>如果只是使用Flink自己的序列化器，那么此章节无影响。</p>
+<h2 id="2-1-使用自定义状态序列化器"><a href="#2-1-使用自定义状态序列化器" class="headerlink" title="2.1 使用自定义状态序列化器"></a>2.1 使用自定义状态序列化器</h2><p>在注册一个托管的operator或者keyed state时，需要一个状态描述符来指定状态的名称以及关于状态类型的信息。Flink的类型序列化框架使用类型信息为状态创建适当的序列化器。</p>
+<p>也可以完全绕过它，让Flink使用自定义序列化器来序列化托管state，只需使用自定义的TypeSerializer实现类来直接创建StateDescriptor:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">class CustomTypeSerializer extends TypeSerializer[(String, Integer)] &#123;...&#125;</span><br><span class="line"></span><br><span class="line">val descriptor = new ListStateDescriptor[(String, Integer)](</span><br><span class="line">    &quot;state-name&quot;,</span><br><span class="line">    new CustomTypeSerializer)</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">checkpointedState = getRuntimeContext.getListState(descriptor)</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-2-状态序列化器及schema演变"><a href="#2-2-状态序列化器及schema演变" class="headerlink" title="2.2 状态序列化器及schema演变"></a>2.2 状态序列化器及schema演变</h2><p>本节解释与状态序列化和模式演化相关的面向用户的抽象，以及Flink如何与这些抽象交互的必要内部细节。</p>
+<p>当从保存点恢复时，Flink允许更改用于读写以前注册过地state序列化器，这样用户就不会被锁定在任何特定的序列化模式中。当状态恢复时，将为该状态注册一个新的序列化器(即与用于访问还原作业中的状态的StateDescriptor一起提供的序列化器)。这个新的序列化器可能具有与前一个序列化器不同的模式。因此，在实现状态序列化器时，除了读取/写入数据的基本逻辑之外，另一件需要记住的重要事情是如何在将来更改序列化模式。</p>
+<p>当谈到schema时，在这种上下文中，这个术语在引用状态类型的数据模型和序列化二进制格式之间是可以互换的。一般来说，schema可以在以下几种情况下改变:</p>
+<ol>
+<li>状态类型的数据schema已经改变，即从用作状态类型的POJO类中添加或删除字段；</li>
+<li>一般来说，在更改数据schema之后，需要升级序列化器的序列化格式;</li>
+<li>序列化器的配置已经更改。</li>
+</ol>
+<p>为了让新的执行程序获得关于已写state schema的信息并检测它是否已更改，在获取operator的state的保存点后，需要将状态序列化器的快照与状态字节一起写入。这是一个TypeSerializerSnapshot的抽象，在下一小节中解释。</p>
+<h3 id="2-2-1-TypeSerializerSnapshot"><a href="#2-2-1-TypeSerializerSnapshot" class="headerlink" title="2.2.1 TypeSerializerSnapshot"></a>2.2.1 TypeSerializerSnapshot</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public interface TypeSerializerSnapshot&lt;T&gt; &#123;</span><br><span class="line">    int getCurrentVersion();</span><br><span class="line">    void writeSnapshot(DataOuputView out) throws IOException;</span><br><span class="line">    void readSnapshot(int readVersion, DataInputView in, ClassLoader userCodeClassLoader) throws IOException;</span><br><span class="line">    TypeSerializerSchemaCompatibility&lt;T&gt; resolveSchemaCompatibility(TypeSerializer&lt;T&gt; newSerializer);</span><br><span class="line">    TypeSerializer&lt;T&gt; restoreSerializer();</span><br><span class="line">&#125;</span><br><span class="line">public abstract class TypeSerializer&lt;T&gt; &#123;    </span><br><span class="line">    </span><br><span class="line">    // ...</span><br><span class="line">    </span><br><span class="line">    public abstract TypeSerializerSnapshot&lt;T&gt; snapshotConfiguration();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>序列化的TypeSerializerSnapshot是一个时间点信息，它作为state序列化的写schema的唯一来源，以及恢复与给定时间点相同的序列化所必需的任何附加信息。在writeSnapshot和readSnapshot方法中定义了关于在还原时作为序列化器快照应该写入和读取什么内容的逻辑。</p>
+<p>注意，快照自己写schema时也可能需要随着时间的推移而改变(例如，当您希望向快照中添加关于序列化器的更多信息时)。为了方便实现这一点，需要对快照进行版本控制，并在getCurrentVersion方法中定义当前版本号。在还原时，当从保存点读取序列化快照时，写入快照的schema版本将提供给readSnapshot方法，以便读取实现能够处理不同的版本。</p>
+<p>在还原时，应该在resolveSchemaCompatibility方法中实现检测新序列化schema是否更改的逻辑。当在operator的恢复执行中，使用新的序列化器再次注册以前的已注册的state时，将通过此方法将新的序列化器提供给前一个序列化器的快照。该方法返回一个TypeSerializerSchemaCompatibility，表示兼容性解析的结果，该结果可以是以下情况之一:</p>
+<ol>
+<li><strong>TypeSerializerSchemaCompatibility.compatible bleasis()</strong>:这个结果表明新的序列化器是兼容的，这意味着新的序列化器具有与前一个序列化器相同的schema。可能在resolveSchemaCompatibility方法中重新配置了新的序列化器，使其兼容;</li>
+<li><strong>TypeSerializerSchemaCompatibility.compatibleAfterMigration()</strong>:这一结果表明新的序列化器有不同的序列化schema,并可以从旧模式通过使用前面的序列化器(承认旧模式)读取字节状态对象,然后重写对象回到字节与新的序列化上(承认新模式)。</li>
+<li><strong>TypeSerializerSchemaCompatibility.incompatible()</strong>:这个结果表明新的序列化具有不同的序列化schema，但是不能从旧的schema迁移。</li>
+</ol>
+<p>最后一点是要在需要迁移的情况下如何获得前面的序列化方式。已经序列化的TypeSerializerSnapshot的另一个重要作用是，它作为一个工厂类来恢复之前的序列化方式。更具体地说，TypeSerializerSnapshot应该实现restoreSerializer方法来创建一个序列化实例，该实例识别前一个序列化方式的schema和配置，因此可以安全地读取前一个序列化方式编写的数据。</p>
+<h3 id="2-2-2-Flink如何与TypeSerializer和TypeSerializerSnapshot抽象交互"><a href="#2-2-2-Flink如何与TypeSerializer和TypeSerializerSnapshot抽象交互" class="headerlink" title="2.2.2 Flink如何与TypeSerializer和TypeSerializerSnapshot抽象交互"></a>2.2.2 Flink如何与TypeSerializer和TypeSerializerSnapshot抽象交互</h3><p>最后，本节总结Flink，或者更具体地说是state后端，如何与抽象进行交互。state后端的交互略有不同，但这与状态序列化器及其序列化快照的实现是一样的。</p>
+<p><strong>堆外state后端</strong>(例如rocksdbstatebacked)</p>
+<ol>
+<li>使用schema A序列化方式来注册新state</li>
+</ol>
+<ul>
+<li>用于在每个state访问上读/写state的已注册的TypeSerializer;</li>
+<li>state是在schema A中编写的;</li>
+</ul>
+<ol start="2">
+<li>取一个保存点</li>
+</ol>
+<ul>
+<li>序列化快照是通过TypeSerializer#snapshotConfiguration方法提取的；</li>
+<li>序列化器快照被写入保存点，并且状态字节已用模式A序列化了；</li>
+</ul>
+<ol start="3">
+<li>已修复的执行程序使用具有模式B的state序列化方式重新访问已恢复的状态字节；</li>
+</ol>
+<ul>
+<li>恢复前一个状态序列化的快照；</li>
+<li>状态字节在还原时不被反序列化，只加载回state后端(因此，仍然在模式A中);</li>
+<li>在接收到新的序列化器后，通过TypeSerializer# resolveschemacompatiability将其传给已恢复的前一个序列化器的快照，以检查模式兼容性;</li>
+</ul>
+<ol start="4">
+<li>将后端中的状态字节从模式A迁移到模式B</li>
+</ol>
+<ul>
+<li>如果兼容性解决方案反映schema已经更改，并且可以迁移，则执行schema迁移。识别schema A的前一个状态序列化器将通过TypeSerializerSnapshot#restoreSerializer()从序列化器快照中获得，并用于将状态字节反序列化到对象中，对象又会被新的序列化器重新编写，新的序列化器识别模式B以完成迁移。在继续处理之前，将所有被访问状态一起迁移；</li>
+<li>如果不兼容，则状态访问将失败；</li>
+</ul>
+<p><strong>堆内state后端</strong>(如memorystatebacked、fsstatebacked)</p>
+<ol>
+<li>使用具有schema A的状态序列化器注册新状态</li>
+</ol>
+<ul>
+<li>已注册的类型序列化器由状态后端维护;</li>
+</ul>
+<ol start="2">
+<li>取一个保存点，用schema A 序列化所有状态</li>
+</ol>
+<ul>
+<li>序列化器快照是通过TypeSerializer#snapshotConfiguration方法提取的;</li>
+<li>序列化器快照被写入保存点;</li>
+<li>状态对象现在使用schema A来将序列化写入到保存点;</li>
+</ul>
+<ol start="3">
+<li>还原时，将状态反序列化为堆中的对象</li>
+</ol>
+<ul>
+<li>恢复前一个状态序列化器的快照；</li>
+<li>前面的序列化器识别schema A，它通过TypeSerializerSnapshot#restoreSerializer()从序列化器快照获得，用于将状态字节反序列化到对象；</li>
+<li>从现在开始，所有的状态都已反序列化；</li>
+</ul>
+<p>4.已恢复的执行程序使用具有schema B的state序列化器重新访问以前的状态</p>
+<ul>
+<li>在接收到新的序列化器后，通过TypeSerializer# resolveschemacompatiability将其提供给已恢复的前一个序列化器的快照，以检查模式兼容性;</li>
+<li>如果兼容性检查表明需要迁移，那么在这种情况下不会发生任何事情，因为对于堆后端，所有状态都已经反序列化为对象;</li>
+<li>如果表明不兼容，则状态访问将异常失败;</li>
+</ul>
+<ol start="5">
+<li>以另一个保存点为例，使用schema B序列化所有状态</li>
+</ol>
+<ul>
+<li>与步骤2相同，但现在状态字节都在模式B中。</li>
+</ul>
+<h2 id="2-3-实现说明和最佳实践"><a href="#2-3-实现说明和最佳实践" class="headerlink" title="2.3 实现说明和最佳实践"></a>2.3 实现说明和最佳实践</h2><p><strong>1. Flink通过用类名实例化来恢复序列化器快照</strong></p>
+<p>序列化快照是已注册状态序列化的唯一来源，它作为保存点中读取状态的入口，为了能够恢复和访问以前的状态，必须能够恢复以前的状态序列化器的快照。</p>
+<p>Flink通过首先实例化TypeSerializerSnapshot及其类名(与快照字节一起编写)来恢复序列化器快照。因此，为了避免意外更改类名或实例化失败，TypeSerializerSnapshot类应该:</p>
+<ul>
+<li>避免被实现为匿名类或嵌套类；</li>
+<li>实体类有一个公共的空构造函数；</li>
+</ul>
+<p><strong>2. 避免在不同的序列化器之间共享相同的TypeSerializerSnapshot类</strong></p>
+<p>由于schema兼容性检查要通过序列化器快照，因此让多个序列化器返回与其快照相同的TypeSerializerSnapshot类将使TypeSerializerSnapshot# resolveschemacompatiability和TypeSerializerSnapshot#restoreSerializer()方法的实现变得复杂。</p>
+<p>这也将是一个糟糕的关注点分离;单个序列化器的schema、序列化配置以及如何恢复，应该整合到它专用的TypeSerializerSnapshot类中。</p>
+<p><strong>3.为包含嵌套序列化器的序列化器使用CompositeSerializerSnapshot实用程序</strong></p>
+<p>在某些情况下，类型序列化器依赖于其他嵌套的类型序列化器;以Flink的TupleSerializer为例，其中为tuple字段配置了嵌套的类型序列化器。在这种情况下，最外层序列化器的快照还应该包含嵌套序列化器的快照。</p>
+<p>CompositeSerializerSnapshot可以专门用于这个场景。它封装了解析复合序列化器的总体模式兼容性检查结果的逻辑。关于如何使用它的示例，可以参考Flink的ListSerializerSnapshot实现。</p>
+<h2 id="2-4-在Flink-1-7之前从废弃的序列化器快照api进行迁移"><a href="#2-4-在Flink-1-7之前从废弃的序列化器快照api进行迁移" class="headerlink" title="2.4 在Flink 1.7之前从废弃的序列化器快照api进行迁移"></a>2.4 在Flink 1.7之前从废弃的序列化器快照api进行迁移</h2><p>本节介绍如何从Flink 1.7之前的序列化器和序列化器快照迁移API。</p>
+<p>在Flink 1.7之前，序列化器快照是作为TypeSerializerConfigSnapshot实现的(现在已经弃用了，将来会被删除，完全由新的TypeSerializerSnapshot接口替代)。此外，序列化器schema兼容性检查的职责存在于TypeSerializer中，在TypeSerializer#ensureCompatibility(TypeSerializerConfigSnapshot)方法中实现。</p>
+<p>新旧抽象之间的另一个主要区别是，已弃用的TypeSerializerConfigSnapshot不具备实例化前一个序列化器的能力。因此，如果序列化器仍然返回TypeSerializerConfigSnapshot的子类作为其快照，则序列化器实例本身将始终使用Java序列化被写入保存点，以便在还原时可以使用上一个序列化器。这是非常不可取的，因为恢复作业是否成功取决于前一个序列化器的类的可用性，或者通常情况下，是否可以在还原时使用Java序列化读回序列化器实例。这意味着您的状态只能使用相同的序列化器，一旦您想要升级序列化器类或执行模式迁移，就会出现问题。<br>为了避免将来的问题，并具有迁移状态序列化器和模式的灵活性，强烈建议从旧的抽象迁移。这样做的步骤如下:</p>
+<ol>
+<li>实现TypeSerializerSnapshot的新子类。这将是序列化器的新快照；</li>
+<li>在TypeSerializer#snapshotConfiguration()方法中，返回新的TypeSerializerSnapshot作为序列化器的序列化器快照；</li>
+<li>从Flink 1.7之前存在的保存点恢复作业，然后再次获取保存点。注意，在此步骤中，序列化器的旧TypeSerializerConfigSnapshot必须仍然存在于类路径中，并且不能删除TypeSerializer#ensureCompatibility(TypeSerializerConfigSnapshot)方法的实现。这个过程的目的是用序列化器新实现的TypeSerializerSnapshot替换用旧保存点编写的TypeSerializerConfigSnapshot；</li>
+<li>一旦您使用Flink 1.7获取了一个保存点，保存点将包含TypeSerializerSnapshot作为状态序列化器快照，并且序列化器实例将不再被写入保存点。现在，可以安全地从序列化器中删除旧抽象的所有实现(删除旧的TypeSerializerConfigSnapshot实现，以及从序列化器中删除TypeSerializer#ensureCompatibility(TypeSerializerConfigSnapshot))。</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/wechat-qcode.jpg" alt="林夕_Yume wechat" style="width: 200px; max-width: 100%;">
+    <div>欢迎您订阅我的公众号!</div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持分享，您的支持是我创作的动力!</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="林夕_Yume 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/flink/" rel="tag"># flink</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/07/27/flinkyarn/" rel="next" title="flink on yarn 启动源码分析">
+                <i class="fa fa-chevron-left"></i> flink on yarn 启动源码分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/monkey.jpg" alt="林夕_Yume">
+            
+              <p class="site-author-name" itemprop="name">林夕_Yume</p>
+              <p class="site-description motion-element" itemprop="description">一个分享自己经历，感触以及工作成长的地方。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-状态schema演变"><span class="nav-number">1.</span> <span class="nav-text">1.状态schema演变</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-演化状态schema"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 演化状态schema</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-状态schema支持的数据类型"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 状态schema支持的数据类型</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-自定义状态序列化"><span class="nav-number">2.</span> <span class="nav-text">2.自定义状态序列化</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-使用自定义状态序列化器"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 使用自定义状态序列化器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-状态序列化器及schema演变"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 状态序列化器及schema演变</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-1-TypeSerializerSnapshot"><span class="nav-number">2.2.1.</span> <span class="nav-text">2.2.1 TypeSerializerSnapshot</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-2-Flink如何与TypeSerializer和TypeSerializerSnapshot抽象交互"><span class="nav-number">2.2.2.</span> <span class="nav-text">2.2.2 Flink如何与TypeSerializer和TypeSerializerSnapshot抽象交互</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-实现说明和最佳实践"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 实现说明和最佳实践</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-在Flink-1-7之前从废弃的序列化器快照api进行迁移"><span class="nav-number">2.4.</span> <span class="nav-text">2.4 在Flink 1.7之前从废弃的序列化器快照api进行迁移</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">林夕_Yume</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
