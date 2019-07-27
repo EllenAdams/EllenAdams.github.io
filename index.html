@@ -272,6 +272,183 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/27/flinkOpt/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="林夕_Yume">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/monkey.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="林夕的部落格">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/07/27/flinkOpt/" itemprop="url">Flink Java Opts设置详解</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-07-27T09:47:43+08:00">
+                2019-07-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/实用技术/" itemprop="url" rel="index">
+                    <span itemprop="name">实用技术</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/实用技术/Flink/" itemprop="url" rel="index">
+                    <span itemprop="name">Flink</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="设置Java-Opts"><a href="#设置Java-Opts" class="headerlink" title="设置Java Opts"></a>设置Java Opts</h1><ul>
+<li><p>可以手动设置环境变量JAVA_HOME或配置项env.java.home中conf/flink-conf.yaml，如果你想手动覆盖Java运行时使用。</p>
+</li>
+<li><p>所有配置都已完成conf/flink-conf.yaml，预计将是具有格式的YAML键值对的扁平集合key: value。</p>
+</li>
+<li><p>系统和运行脚本在启动时解析配置。对配置文件的更改需要重新启动Flink JobManager和TaskManagers。TaskManagers的配置文件可能不同，Flink不承担集群中的统一机器。</p>
+</li>
+</ul>
+<h2 id="1-flink-conf-yaml"><a href="#1-flink-conf-yaml" class="headerlink" title="1.flink-conf.yaml"></a>1.flink-conf.yaml</h2><ul>
+<li>flink-conf.yaml中设置：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">env.java.opts: -XX:+UseConcMarkSweepGC -XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly -XX:+AlwaysPreTouch -server -XX:+HeapDumpOnOutOfMemoryError</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h2 id="2-flink启动脚本"><a href="#2-flink启动脚本" class="headerlink" title="2.flink启动脚本"></a>2.flink启动脚本</h2><ul>
+<li><p>jvm相关参数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">堆设置</span><br><span class="line">-Xms :初始堆大小</span><br><span class="line">-Xmx :最大堆大小</span><br><span class="line">-XX:NewSize=n :设置年轻代大小</span><br><span class="line">-XX:NewRatio=n: 设置年轻代和年老代的比值。如:为3，表示年轻代与年老代比值为1：3，年轻代占整个年轻代年老代和的1/4</span><br><span class="line">-XX:SurvivorRatio=n :年轻代中Eden区与两个Survivor区的比值。注意Survivor区有两个。如：3，表示Eden：Survivor=3：2，一个Survivor区占整个年轻代的1/5</span><br><span class="line">-XX:MaxPermSize=n :设置持久代大小</span><br><span class="line">收集器设置</span><br><span class="line">-XX:+UseSerialGC :设置串行收集器</span><br><span class="line">-XX:+UseParallelGC :设置并行收集器</span><br><span class="line">-XX:+UseParalledlOldGC :设置并行年老代收集器</span><br><span class="line">-XX:+UseConcMarkSweepGC :设置并发收集器</span><br><span class="line">垃圾回收统计信息</span><br><span class="line">-XX:+PrintHeapAtGC GC的heap详情</span><br><span class="line">-XX:+PrintGCDetails  GC详情</span><br><span class="line">-XX:+PrintGCTimeStamps  打印GC时间信息</span><br><span class="line">-XX:+PrintTenuringDistribution    打印年龄信息等</span><br><span class="line">-XX:+HandlePromotionFailure   老年代分配担保（true  or false）</span><br><span class="line">并行收集器设置</span><br><span class="line">-XX:ParallelGCThreads=n :设置并行收集器收集时使用的CPU数。并行收集线程数。</span><br><span class="line">-XX:MaxGCPauseMillis=n :设置并行收集最大暂停时间</span><br><span class="line">-XX:GCTimeRatio=n :设置垃圾回收时间占程序运行时间的百分比。公式为1/(1+n)</span><br><span class="line">并发收集器设置</span><br><span class="line">-XX:+CMSIncrementalMode :设置为增量模式。适用于单CPU情况。</span><br><span class="line">-XX:ParallelGCThreads=n :设置并发收集器年轻代收集方式为并行收集时，使用的CPU数。并行收集线程数</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>flink启动脚本:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">./flink-1.2.0/bin/flink run -m yarn-cluster -yn 4 -yjm 2048 -ytm 8086 -c beam.count.OpsCount -yqu data-default \</span><br><span class="line">-yD taskmanager.heap.size=4096 -yD yarn.heap-cutoff-ratio=0.6 -yD taskmanager.debug.memory.startLogThread=true -yD taskmanager.debug.memory.logIntervalMs=600000 \</span><br><span class="line">-yz toratest -yst -yd ./beampoc-bundled-0.0.1-SNAPSHOT.jar --parallelism=4</span><br><span class="line">-yD env.java.opts=&quot;-XX:NewRatio=2&quot;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>默认flink 4container slot4 的jmap输出:</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">Heap Configuration:</span><br><span class="line">   MinHeapFreeRatio         = 0</span><br><span class="line">   MaxHeapFreeRatio         = 100</span><br><span class="line">   MaxHeapSize              = 2359296000 (2250.0MB)</span><br><span class="line">   NewSize                  = 786432000 (750.0MB)</span><br><span class="line">   MaxNewSize               = 786432000 (750.0MB)</span><br><span class="line">   OldSize                  = 1572864000 (1500.0MB)</span><br><span class="line">   NewRatio                 = 2</span><br><span class="line">   SurvivorRatio            = 8</span><br><span class="line">   MetaspaceSize            = 21807104 (20.796875MB)</span><br><span class="line">   CompressedClassSpaceSize = 1073741824 (1024.0MB)</span><br><span class="line">   MaxMetaspaceSize         = 17592186044415 MB</span><br><span class="line">   G1HeapRegionSize         = 0 (0.0MB)</span><br><span class="line"></span><br><span class="line">Heap Usage:</span><br><span class="line">PS Young Generation</span><br><span class="line">Eden Space:</span><br><span class="line">   capacity = 476053504 (454.0MB)</span><br><span class="line">   used     = 224818576 (214.40370178222656MB)</span><br><span class="line">   free     = 251234928 (239.59629821777344MB)</span><br><span class="line">   47.225484974058716% used</span><br><span class="line">From Space:</span><br><span class="line">   capacity = 101187584 (96.5MB)</span><br><span class="line">   used     = 85147536 (81.20301818847656MB)</span><br><span class="line">   free     = 16040048 (15.296981811523438MB)</span><br><span class="line">   84.14820537665965% used</span><br><span class="line">To Space:</span><br><span class="line">   capacity = 155189248 (148.0MB)</span><br><span class="line">   used     = 0 (0.0MB)</span><br><span class="line">   free     = 155189248 (148.0MB)</span><br><span class="line">   0.0% used</span><br><span class="line">PS Old Generation</span><br><span class="line">   capacity = 1572864000 (1500.0MB)</span><br><span class="line">   used     = 922110224 (879.3928375244141MB)</span><br><span class="line">   free     = 650753776 (620.6071624755859MB)</span><br><span class="line">   58.62618916829427% used</span><br><span class="line"></span><br><span class="line">22206 interned Strings occupying 2255248 bytes.</span><br></pre></td></tr></table></figure>
+
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/27/test/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -594,7 +771,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-count">3</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -605,7 +782,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-count">3</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -616,7 +793,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-count">4</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
