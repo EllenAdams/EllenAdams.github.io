@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Otter,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Adminguide1.几点说明otter系统自带了manager，所以简化了一些admin管理上的操作成本，比如可以通过manager发布同步任务配置，接收同步任务反馈的状态信息等。 目前manager的操作可分为两部分：  同步配置管理   添加数据源 canal解析配置 添加数据表 同步任务   同步状态查询   查询延迟 查询吞吐量 查询同步进度 查询报警&amp;amp;异常日志  manage">
+<meta name="keywords" content="Otter">
+<meta property="og:type" content="article">
+<meta property="og:title" content="4.Otter操作简介">
+<meta property="og:url" content="http://yoursite.com/2019/07/27/4.Otter操作简介/index.html">
+<meta property="og:site_name" content="林夕的部落格">
+<meta property="og:description" content="Adminguide1.几点说明otter系统自带了manager，所以简化了一些admin管理上的操作成本，比如可以通过manager发布同步任务配置，接收同步任务反馈的状态信息等。 目前manager的操作可分为两部分：  同步配置管理   添加数据源 canal解析配置 添加数据表 同步任务   同步状态查询   查询延迟 查询吞吐量 查询同步进度 查询报警&amp;amp;异常日志  manage">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-6cd59f2a2589a445.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-83a13f782fb4822b?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-dbee08c03f83a936?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-64f51582fea708d0?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-6812bebbadf3f55f?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-3af7a7351420032b?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-dec193e9dfcb910d?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-b5f419f05387facf?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-4b775185b6407541?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-34b39492f3300a56?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-278fccdd27856daf?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-cf420b44df594147?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-3a72945513bb1278.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-493d0067c2eea9d3?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-849fdf2a7c5af559?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-91eded13b8da0974?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-5f81455059558a55?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-7e4e32172828c8cf?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-6c08a48f2a3cb44a?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-eb836a5c4071bb4c?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-851b3c84874420ac?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-1094307712c91f25?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2019-07-27T04:52:50.670Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="4.Otter操作简介">
+<meta name="twitter:description" content="Adminguide1.几点说明otter系统自带了manager，所以简化了一些admin管理上的操作成本，比如可以通过manager发布同步任务配置，接收同步任务反馈的状态信息等。 目前manager的操作可分为两部分：  同步配置管理   添加数据源 canal解析配置 添加数据表 同步任务   同步状态查询   查询延迟 查询吞吐量 查询同步进度 查询报警&amp;amp;异常日志  manage">
+<meta name="twitter:image" content="https://upload-images.jianshu.io/upload_images/13935362-6cd59f2a2589a445.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/07/27/4.Otter操作简介/">
+
+
+
+
+
+  <title>4.Otter操作简介 | 林夕的部落格</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">林夕的部落格</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">惟有不相忘，可抵岁月长！</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/27/4.Otter操作简介/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="林夕_Yume">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/monkey.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="林夕的部落格">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">4.Otter操作简介</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-07-27T12:52:50+08:00">
+                2019-07-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/实用技术/" itemprop="url" rel="index">
+                    <span itemprop="name">实用技术</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/实用技术/Otter/" itemprop="url" rel="index">
+                    <span itemprop="name">Otter</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Adminguide"><a href="#Adminguide" class="headerlink" title="Adminguide"></a>Adminguide</h1><h1 id="1-几点说明"><a href="#1-几点说明" class="headerlink" title="1.几点说明"></a>1.几点说明</h1><p>otter系统自带了manager，所以简化了一些admin管理上的操作成本，比如可以通过manager发布同步任务配置，接收同步任务反馈的状态信息等。</p>
+<p>目前manager的操作可分为两部分：</p>
+<ul>
+<li>同步配置管理</li>
+</ul>
+<ol>
+<li>添加数据源</li>
+<li>canal解析配置</li>
+<li>添加数据表</li>
+<li>同步任务</li>
+</ol>
+<ul>
+<li>同步状态查询</li>
+</ul>
+<ol>
+<li>查询延迟</li>
+<li>查询吞吐量</li>
+<li>查询同步进度</li>
+<li>查询报警&amp;异常日志</li>
+</ol>
+<p>manager的用户权限在设计的时候，主要分为三类：</p>
+<ul>
+<li>ADMIN : 超级管理员</li>
+<li>OPERATOR : 普通用户，管理某个同步任务下的同步配置，添加数据表，修改canal配置等</li>
+<li>ANONYMOUS : 匿名用户，只能进行同步状态查询的操作.</li>
+</ul>
+<h1 id="2-Manager配置介绍"><a href="#2-Manager配置介绍" class="headerlink" title="2.Manager配置介绍"></a>2.Manager配置介绍</h1><p>deep edited this page on 19 Dec 2017 · 7 revisions</p>
+<h2 id="2-1-操作演示"><a href="#2-1-操作演示" class="headerlink" title="2.1 操作演示"></a>2.1 操作演示</h2><p>演示视频（5分钟教你配置一个同步任务）：请点击图片或者这里<br><a href="http://www.tudou.com/programs/view/Q-qnCg7d-ew" target="_blank" rel="noopener"><img src="https://upload-images.jianshu.io/upload_images/13935362-6cd59f2a2589a445.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="ScreenShot"></a><br>演示说明：</p>
+<ol>
+<li>搭建一个数据库同步任务，源数据库ip为：10.20.144.25，目标数据库ip为：10.20.144.29. 源数据库已开启binlog，并且binlog_format为ROW.</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show variables like &apos;%binlog_format%&apos;;</span><br><span class="line">+---------------+-------+</span><br><span class="line">| Variable_name | Value |</span><br><span class="line">+---------------+-------+</span><br><span class="line">| binlog_format | ROW   |</span><br><span class="line">+---------------+-------+</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li><p>数据同步精确到一张表进行测试，测试的表名为test.example，简单包含两个子段，测试过程中才创建.</p>
+</li>
+<li><p>配置完成后，手动在源库插入数据，然后快速在目标库进行查看数据，验证数据是否同步成功.</p>
+</li>
+</ol>
+<hr>
+<p>视频中的演示文本：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE  `test`.`example` (</span><br><span class="line">  `id` int(11)  NOT NULL AUTO_INCREMENT,</span><br><span class="line">  `name` varchar(32) COLLATE utf8_bin DEFAULT NULL ,</span><br><span class="line">   PRIMARY KEY (`ID`)</span><br><span class="line">) ENGINE=InnoDB DEFAULT CHARSET=utf8;</span><br><span class="line"></span><br><span class="line">insert into test.example(id,name) values(null,&apos;hello&apos;);</span><br><span class="line"></span><br><span class="line">-----</span><br><span class="line">Otter QuickStart 如何配置一个任务</span><br><span class="line">-----</span><br><span class="line">操作步骤：</span><br><span class="line">1.  添加数据库</span><br><span class="line">    a.  源库 jdbc:mysql://10.20.144.25:3306</span><br><span class="line">    b.  目标库 jdbc:mysql://10.20.144.29:3306</span><br><span class="line">2.  添加canal</span><br><span class="line">    a.  提供数据库ip信息 </span><br><span class="line">3.  添加同步表信息</span><br><span class="line">    a.  源数据表 test.example</span><br><span class="line">    b.  目标数据表 test.example</span><br><span class="line">4.  添加channel</span><br><span class="line">5.  添加pipeline</span><br><span class="line">    a.  选择node节点</span><br><span class="line">    b.  选择canal</span><br><span class="line">6.  添加同步映射规则</span><br><span class="line">    a.  定义源表和目标表的同步关系</span><br><span class="line">7.  启动</span><br><span class="line">8.  测试数据</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-2-通道配置说明"><a href="#2-2-通道配置说明" class="headerlink" title="2.2 通道配置说明"></a>2.2 通道配置说明</h2><h3 id="2-2-1-多种同步方式配置"><a href="#2-2-1-多种同步方式配置" class="headerlink" title="2.2.1 多种同步方式配置"></a>2.2.1 多种同步方式配置</h3><h4 id="a-单向同步"><a href="#a-单向同步" class="headerlink" title="a. 单向同步"></a>a. 单向同步</h4><p>单向同步为最基本的同步方式，目前支持mysql -&gt; mysql/oracle的同步.</p>
+<p>基本配置方式就如操作视频中所演示的，操作步骤：</p>
+<p>配置一个channel<br>配置一个pipeline<br>对应node机器选择时，建议遵循：S/E节点选择node需尽可能离源数据库近，T/L节点选择node则离目标数据库近. 如果无法提供双节点，则选择离目标数据库近的node节点相对合适.<br>配置一个canal<br>定义映射关系.<br>canal中配置解析的数据库ip需要和映射关系中源表对应的数据库ip一致. ps. 映射关系进行匹配的时候是基于表名，虽然数据库ip不匹配也会是有效.</p>
+<h4 id="b-双向同步"><a href="#b-双向同步" class="headerlink" title="b. 双向同步"></a>b. 双向同步</h4><p>双向同步可以理解为两个单向同步的组合，但需要额外处理避免回环同步. 回环同步算法： Otter双向回环控制 .</p>
+<p>同时，因为双向回环控制算法会依赖一些系统表，需要在需要做双向同步的数据库上初始化所需的系统表.</p>
+<p>获取初始sql:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget https://raw.github.com/alibaba/otter/master/node/deployer/src/main/resources/sql/otter-system-ddl-mysql.sql</span><br></pre></td></tr></table></figure>
+
+<p>配置上相比于单向同步有一些不同，操作步骤：</p>
+<p>配置一个channel<br>配置两个pipeline<br>注意：两个单向的canal和映射配置，在一个channel下配置为两个pipeline. 如果是两个channel，每个channel一个pipeline，将不会使用双向回环控制算法，也就是会有重复回环同步.<br>每个pipeline各自配置canal，定义映射关系</p>
+<h4 id="c-双A同步"><a href="#c-双A同步" class="headerlink" title="c. 双A同步"></a>c. 双A同步</h4><p>双A同步相比于双向同步，主要区别是双A机房会在两地修改同一条记录，而双向同步只是两地的数据做互相同步，两地修改的数据内容无交集.</p>
+<p>所以双A同步需要额外处理数据同步一致性问题. 同步一致性算法：Otter数据一致性 ，目前开源版本主要是提供了单向回环补救的一致性方案.</p>
+<p>双A同步相比于双向同步，整个配置主要是一些参数上有变化，具体步骤：</p>
+<ol>
+<li>配置一个channel<br><img src="https://upload-images.jianshu.io/upload_images/13935362-83a13f782fb4822b?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"></li>
+<li>配置两个pipeline<br><img src="https://upload-images.jianshu.io/upload_images/13935362-dbee08c03f83a936?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"></li>
+</ol>
+<ul>
+<li>注意：除了需要定义一个主站点外，需要在高级设置中将一个pipeline的“支持DDL”设置为false，另一个设置为true，否则将提示“一个channel中只允许开启单向ddl同步!”错误<br>每个pipeline各自配置canal，定义映射关系</li>
+</ul>
+<h4 id="d-级联同步"><a href="#d-级联同步" class="headerlink" title="d. 级联同步"></a>d. 级联同步</h4><p>单向同步/双向同步，都是针对一个channel下的多pipeline配置进行控制，是否可以使用多个channel完成类似级联同步的功能.</p>
+<p>几种级联同步.</p>
+<ul>
+<li>A-&gt;B-&gt;C ，A单向同步到B，B再单向同步到C</li>
+<li>A&lt;-&gt;B-&gt;C，A和B组成一个双向，B再单向同步到C</li>
+<li>A&lt;-&gt;B&lt;-C，A和B组成一个双向，C将数据单向同步B，也就是B是一个接受多M同步写入的的节点，目前mysql不支持</li>
+<li>A&lt;-&gt;B-&gt;C，B-/-&gt;D，A和B组成一个双向，B再单向同步到C，但A同步到B的数据不同步到D，但B地写入的数据同步到D，目前mysql不支持.<br>对应操作步骤：</li>
+</ul>
+<ol>
+<li>目前channel之间的级联同步，不需要设置任何参数，只要通过canal进行binlog解析即可.</li>
+<li>针对级联屏蔽同步，需要利用到自定义同步标记的功能，比如A-&gt;B，B同步到C但不同步到D。需要在A-&gt;B的同步高级参数里定义NOT_DDD，然后在B同步到D的高级参数里也定义NOT_DDD. </li>
+<li>原理：这样在B解析到A-&gt;B写入的同步标记为NOT_DDD，与当前同步定义的NOT_DDD进行匹配，就会忽略此同步.<img src="https://upload-images.jianshu.io/upload_images/13935362-64f51582fea708d0?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"></li>
+</ol>
+<h4 id="e-多A同步"><a href="#e-多A同步" class="headerlink" title="e. 多A同步"></a>e. 多A同步</h4><p>基于以上的单向/双向/双A/级联同步，可以随意搭建出多A同步，不过目前受限于同步数据的一致性算法，只能通过星形辐射，通过级联同步的方式保证全局多A机房的数据一致性.<br>比如图中B和C之前的一致性同步，需要通过主站点A来保证.</p>
+<h3 id="2-2-2-自定义数据同步-自-由-门"><a href="#2-2-2-自定义数据同步-自-由-门" class="headerlink" title="2.2.2 自定义数据同步(自 由 门)"></a>2.2.2 自定义数据同步(自 由 门)</h3><p>主要功能是在不修改原始表数据的前提下，触发一下数据表中的数据同步。</p>
+<p>可用于：</p>
+<ul>
+<li>同步数据订正</li>
+<li>全量数据同步. (自 由 门触发全量，同时otter增量同步，需要配置为行记录模式，避免update时因目标库不存在记录而丢失update操作)<br>主要原理：</li>
+</ul>
+<p>a. 基于otter系统表retl_buffer，插入特定的数据，包含需要同步的表名，pk信息。</p>
+<p>b. otter系统感知后会根据表名和pk提取对应的数据(整行记录)，和正常的增量同步一起同步到目标库。</p>
+<p>目前otter系统感知的自 由 门数据方式为：</p>
+<ul>
+<li>日志记录. (插入表数据的每次变更，需要开启binlog，otter获取binlog数据，提取同步的表名，pk信息，然后回表查询整行记录)<br>retl_buffer表结构：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE retl_buffer </span><br><span class="line">   (    </span><br><span class="line">    ID BIGINT AUTO_INCREMENT,   ## 无意义，自增即可</span><br><span class="line">    TABLE_ID INT(11) NOT NULL,   ## tableId, 可通过该链接查询：http://otter.alibaba-inc.com/data_media_list.htm，即序号这一列，如果配置的是正则，需要指定full_name，当前table_id设置为0. </span><br><span class="line">    FULL_NAME varchar(512),  ## schemaName + &apos;.&apos; +  tableName  (如果明确指定了table_id，可以不用指定full_name)</span><br><span class="line">    TYPE CHAR(1) NOT NULL,   ## I/U/D ，分别对应于insert/update/delete</span><br><span class="line">    PK_DATA VARCHAR(256) NOT NULL, ## 多个pk之间使用char(1)进行分隔</span><br><span class="line">    GMT_CREATE TIMESTAMP NOT NULL, ## 无意义，系统时间即可</span><br><span class="line">    GMT_MODIFIED TIMESTAMP NOT NULL,  ## 无意义，系统时间即可</span><br><span class="line">    CONSTRAINT RETL_BUFFER_ID PRIMARY KEY (ID) </span><br><span class="line">   )  ENGINE=InnoDB DEFAULT CHARSET=utf8;</span><br></pre></td></tr></table></figure>
+
+<p>全量同步操作示例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">insert into retl.retl_buffer(ID,TABLE_ID,</span><br><span class="line">FULL_NAME,TYPE,PK_DATA,GMT_CREATE,GMT_MODIFIED)</span><br><span class="line">(select null,0,&apos;$schema.table$&apos;,&apos;I&apos;,id,now(),now</span><br><span class="line">() from $schema.table$);</span><br></pre></td></tr></table></figure>
+
+<p>如果针对多主键时，对应的PK_DATA需要将需要同步表几个主键按照(char)1进行拼接,比如 concat(id,char(1),name)</p>
+<h2 id="2-3-具体参数详解"><a href="#2-3-具体参数详解" class="headerlink" title="2.3 具体参数详解"></a>2.3 具体参数详解</h2><h3 id="2-3-1-channel参数"><a href="#2-3-1-channel参数" class="headerlink" title="2.3.1 channel参数"></a>2.3.1 channel参数</h3><ol>
+<li>同步一致性. ==&gt; 基于数据库反查(根据binlog反查数据库)，基于当前变更(binlog数据)。针对数据库反查，在延迟比较大时比较有效，可将最新的版本快速同步到目标，但会对源库有压力.</li>
+<li>同步模式. ==&gt; 行模式，列模式。行模式特点：如果目标库不存在记录时，执行插入。列模式主要是变更哪个字段，只会单独修改该字段，在双Ａ同步时，为减少数据冲突，建议选择列模式。</li>
+<li>是否开启数据一致性. ==&gt;　请查看数据一致性文档：Otter数据一致性<br>a. 数据一致性算法<br>b. 一致性反查数据库延迟阀值</li>
+</ol>
+<h3 id="2-3-2-pipeline参数"><a href="#2-3-2-pipeline参数" class="headerlink" title="2.3.2 pipeline参数"></a>2.3.2 pipeline参数</h3><ol>
+<li>并行度. ==&gt; 查看文档：Otter调度模型，主要是并行化调度参数.(滑动窗口大小)</li>
+<li>数据反查线程数. ==&gt; 如果选择了同步一致性为反查数据库，在反查数据库时的并发线程数大小</li>
+<li>数据载入线程数. ==&gt; 在目标库执行并行载入算法时并发线程数大小</li>
+<li>文件载入线程数. ==&gt; 数据带文件同步时处理的并发线程数大小</li>
+<li>主站点. ==&gt; 双Ａ同步中的主站点设置　</li>
+<li>消费批次大小. ==&gt; 获取canal数据的batchSize参数</li>
+<li>获取批次超时时间. ==&gt; 获取canal数据的timeout参数<br>pipeline 高级设置</li>
+</ol>
+<ul>
+<li>使用batch. ==&gt; 是否使用jdbc batch提升效率，部分分布式数据库系统不一定支持batch协议</li>
+<li>跳过load异常. ==&gt; 比如同步时出现目标库主键冲突，开启该参数后，可跳过数据库执行异常</li>
+<li>仲裁器调度模式. ==&gt; 查看文档：Otter调度模型</li>
+<li>负载均衡算法. ==&gt; 查看文档：Otter调度模型</li>
+<li>传输模式. ==&gt; 多个node节点之间的传输方式，RPC或HTTP. HTTP主要就是使用aria2c，如果测试环境不装aria2c，可强制选择为RPC</li>
+<li>记录selector日志. ==&gt; 是否记录简单的canal抓取binlog的情况</li>
+<li>记录selector详细日志. ==&gt; 是否记录canal抓取binlog的数据详细内容</li>
+<li>记录load日志. ==&gt; 是否记录otter同步数据详细内容</li>
+<li>dryRun模式. ==&gt; 只记录load日志，不执行真实同步到数据库的操作</li>
+<li>支持ddl同步. ==&gt; 是否同步ddl语句</li>
+<li>是否跳过ddl异常. ==&gt; 同步ddl出错时，是否自动跳过</li>
+<li>文件重复同步对比 ==&gt; 数据带文件同步时，是否需要对比源和目标库的文件信息，如果文件无变化，则不同步，减少网络传输量.</li>
+<li>文件传输加密 ==&gt; 基于HTTP协议传输时，对应文件数据是否需要做加密处理</li>
+<li>启用公网同步 ==&gt; 每个node节点都会定义一个外部ip信息，如果启用公网同步，同步时数据传递会依赖外部ip.</li>
+<li>跳过自 由 门数据 ==&gt; 自定义数据同步的内容</li>
+<li>跳过反查无记录数据 ==&gt; 反查记录不存在时，是否需要进行忽略处理，不建议开启.</li>
+<li>启用数据表类型转化 ==&gt; 源库和目标库的字段类型不匹配时，开启改功能，可自动进行字段类型转化</li>
+<li>兼容字段新增同步 ==&gt; 同步过程中，源库新增了一个字段(必须无默认值)，而目标库还未增加，是否需要兼容处理</li>
+<li>自定义同步标记 ==&gt; 级联同步中屏蔽同步的功能.</li>
+</ul>
+<h3 id="2-3-3-Canal参数"><a href="#2-3-3-Canal参数" class="headerlink" title="2.3.3 Canal参数"></a>2.3.3 Canal参数</h3><ol>
+<li>数据源信息:<br> 单库配置： 10.20.144.34:3306;<br> 多库合并配置： 10.20.144.34:3306,10.20.144.35:3306; (逗号分隔)<br>主备库配置：10.20.144.34:3306;10.20.144.34:3307; (分号分隔)</li>
+<li>数据库帐号</li>
+<li>数据库密码</li>
+<li>connectionCharset ==&gt; 获取binlog时指定的编码</li>
+<li>位点自定义设置 ==&gt; 格式：{“journalName”:””,”position”:0,”timestamp”:0};<br>指定位置：{“journalName”:””,”position”:0};<br>指定时间：{“timestamp”:0};</li>
+<li>内存存储batch获取模式　==&gt; MEMSIZE/ITEMSIZE，前者为内存控制，后者为数量控制. 　针对MEMSIZE模式的内存大小计算 = 记录数 * 记录单元大小</li>
+<li>内存存储buffer记录数</li>
+<li>内存存储buffer记录单元大小</li>
+<li>HA机制</li>
+<li>心跳SQL配置 ==&gt; 可配置对应心跳SQL，如果配置 是否启用心跳HA，当心跳ＳＱＬ检测失败后，canal就会自动进行主备切换.</li>
+</ol>
+<h3 id="2-3-4-Node参数"><a href="#2-3-4-Node参数" class="headerlink" title="2.3.4 Node参数"></a>2.3.4 Node参数</h3><ol>
+<li>机器名称 ==&gt; 自定义名称，方便记忆</li>
+<li>机器ip ==&gt; 机器外部可访问的ip，不能选择127.0.0.1</li>
+<li>机器端口 ==&gt; 和manager/node之间RPC通讯的端口</li>
+<li>下载端口 ==&gt; 和node之间HTTP通讯的端口</li>
+<li>外部Ip ==&gt; node机器可以指定多IP，通过pipeline配置决定是否启用</li>
+<li>zookeeper集群 ==&gt; 就近选择zookeeper集群</li>
+</ol>
+<h3 id="2-3-5-Zookeeper集群参数"><a href="#2-3-5-Zookeeper集群参数" class="headerlink" title="2.3.5 Zookeeper集群参数"></a>2.3.5 Zookeeper集群参数</h3><ol>
+<li>集群名字 ==&gt; 自定义名称，方便记忆</li>
+<li>zookeeper集群 ==&gt; zookeeper集群机器列表，逗号分隔，最后以分号结束<h3 id="3-6-主备配置参数"><a href="#3-6-主备配置参数" class="headerlink" title="3.6 主备配置参数"></a>3.6 主备配置参数</h3></li>
+<li>group Key ==&gt; 自定义名称，otter其他地方基于该名称进行引用</li>
+<li>master / slave ==&gt; 主备库ip信息<br>生成了groupKey，1. 可以在数据库配置时，设置url：jdbc:mysql://groupKey=key (更改 key). 2. 在canal配置时，选择HA机制为media，可填入该groupKey进行引用</li>
+</ol>
+<p>deep</p>
+<h1 id="3-Manager使用介绍"><a href="#3-Manager使用介绍" class="headerlink" title="3. Manager使用介绍"></a>3. Manager使用介绍</h1><h2 id="3-1-背景"><a href="#3-1-背景" class="headerlink" title="3.1 背景"></a>3.1 背景</h2><p>otter4.0发布至今也差不多有近一年的时间，中间过程有着比较曲折经历，拥抱了许多变化，目前otter4已经在逐步替换otter3，继续服务icbu的相关中美同步业务，otter3即将成为过去式。</p>
+<h2 id="3-2-otter4管理系统-manager"><a href="#3-2-otter4管理系统-manager" class="headerlink" title="3.2 otter4管理系统(manager)"></a>3.2 otter4管理系统(manager)</h2><p>比如我们内部系统使用了otter.alibaba-inc.com的域名，后续文档描述的时候会基于此域名链接</p>
+<h3 id="3-2-1-系统登录"><a href="#3-2-1-系统登录" class="headerlink" title="3.2.1 系统登录"></a>3.2.1 系统登录</h3><p>匿名访问时只拥有同步状态的查询权限，可考虑与自己用户授权管理.</p>
+<h3 id="3-2-2-同步管理"><a href="#3-2-2-同步管理" class="headerlink" title="3.2.2 同步管理"></a>3.2.2 同步管理</h3><p><img src="https://upload-images.jianshu.io/upload_images/13935362-6812bebbadf3f55f?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"></p>
+<h3 id="3-2-3-同步模式配置"><a href="#3-2-3-同步模式配置" class="headerlink" title="3.2.3 同步模式配置"></a>3.2.3 同步模式配置</h3><p><img src="https://upload-images.jianshu.io/upload_images/13935362-3af7a7351420032b?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"><br>说明：</p>
+<p>a. 同步一致性</p>
+<ol>
+<li><p>基于数据库反查 (简单点说，就是强制反查数据库，从binlog中拿到pk，直接反查对应数据库记录进行同步，回退到几天前binlog进行消费时避免同步老版本的数据时可采用)</p>
+</li>
+<li><p>基于当前日志变更 (基于binlog/redolog解析出来的字段变更值进行同步，不做数据库反查，推荐使用)<br>b. 同步模式</p>
+</li>
+<li><p>行模式 (兼容otter3的处理方案，改变记录中的任何一个字段，触发整行记录的数据同步，在目标库执行merge sql)</p>
+</li>
+<li><p>列模式 (基于log中的具体变更字段，按需同步)<br>c. 特殊组合： (同样支持)</p>
+</li>
+<li><p>基于数据库反查+列模式</p>
+</li>
+<li><p>基于当前日志变更+行模式</p>
+<h3 id="3-2-4-同步简要信息"><a href="#3-2-4-同步简要信息" class="headerlink" title="3.2.4 同步简要信息"></a>3.2.4 同步简要信息</h3><p><img src="https://upload-images.jianshu.io/upload_images/13935362-dec193e9dfcb910d?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"><br>说明：</p>
+</li>
+</ol>
+<ul>
+<li>延迟时间 = 数据库同步到目标库成功时间 - 数据库源库产生变更时间， 单位秒. (由对应node节点定时推送配置)</li>
+<li>最后同步时间 = 数据库同步到目标库最近一次的成功时间 (当前同步关注的相关表，同步到目标库的最后一次成功时间)</li>
+<li>最后位点时间 = 数据binlog消费最后一次更新位点的时间 (和同步时间区别：一个数据库可能存在别的表的变更，不会触发同步时间变更，但会触发位点时间变更)</li>
+</ul>
+<h3 id="3-2-5同步详细信息"><a href="#3-2-5同步详细信息" class="headerlink" title="3.2.5同步详细信息"></a>3.2.5同步详细信息</h3><p>目前主要分为几类:</p>
+<ol>
+<li>映射关系列表</li>
+<li>延迟时间</li>
+<li>同步进度</li>
+<li>监控管理</li>
+<li>日志记录</li>
+</ol>
+<p><strong>映射关系列表</strong><br><img src="https://upload-images.jianshu.io/upload_images/13935362-b5f419f05387facf?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"></p>
+<p>点击查看打开映射关系信息页面：<br><img src="https://upload-images.jianshu.io/upload_images/13935362-4b775185b6407541?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"></p>
+<p>说明：</p>
+<ul>
+<li>定义同步的源和目标的表信息 (注意:表明可以不同，可以定义数据库分库/分表)</li>
+<li>Push权重 (对应的数字越大，同步会越后面得到同步，优先同步权重小的数据)</li>
+<li>FileResolver (数据关联文件的解析类，目前支持动态源码推送,在目标jvm里动态编译生效，不再需要起停同步任务)</li>
+<li>EventProcessor (业务自定义的数据处理类，比如可以定义不需要同步status=’ENABLE’的记录或者根据业务改变同步的字段信息 简单业务扩展，otter4新特性)</li>
+<li>字段同步 (定义源和目标的字段映射，字段名和字段类型均可进行映射定义，类似于数据库视图定义功能 otter4新特性)</li>
+<li>组合同步 (字段组的概念，字段组中的一个字段发生变更，会确保字段组中的3个字段一起同步到目标库 otter4新特性)</li>
+<li>多个字段决定一个图片地址，变更文件字段中的任何一个字段，就会触发FileResolver类解析，从而可以确保基于字段同步模式，也可以保证FileResolver能够正常解析出文件 otter4重要的优化)</li>
+</ul>
+<p><strong>吞吐量</strong><br><img src="https://upload-images.jianshu.io/upload_images/13935362-34b39492f3300a56?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"><br>说明：</p>
+<ul>
+<li>数据记录统计 (insert/update/delete的变更总和，不区分具体的表，按表纬度的数据统计，可查看映射关系列表-&gt;每个映射关系右边的行为曲线链接)</li>
+<li>文件记录统计</li>
+</ul>
+<p><strong>延迟时间</strong><br><img src="https://upload-images.jianshu.io/upload_images/13935362-278fccdd27856daf?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"><br>说明：</p>
+<ul>
+<li>延迟时间的统计 = 数据库同步到目标库成功时间 - 数据库源库产生变更时间， 单位秒. (由对应node节点定时推送配置)</li>
+</ul>
+<p><strong>同步进度</strong><br><img src="https://upload-images.jianshu.io/upload_images/13935362-cf420b44df594147?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"><br>说明：</p>
+<ul>
+<li>mainstem状态： 代表canal模块当前的运行节点(也即是binlog解析的运行节点，解析会相对耗jvm内存)</li>
+<li>position状态： 当前同步成功的最后binlog位点信息 (包含链接的是数据库ip/port，对应binlog的位置，对应binlog的变更时间此时间即是计算延迟时间的源库变更时间)</li>
+<li>同步进度： 每个同步批次会有一个唯一标识，可根据该唯一标示进行数据定位，可以查看每个批次的运行时间，找出性能瓶颈点</li>
+</ul>
+<p><strong>监控管理</strong><br><img src="https://upload-images.jianshu.io/upload_images/13935362-3a72945513bb1278.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="监控管理.png"></p>
+<p>说明：</p>
+<p>1.监控项目</p>
+<ul>
+<li>同步延迟，position超时(位点超过多少时间没有更新) ， 一般业务方关心这些即可</li>
+<li>异常 (同步运行过程中出现的异常，比如oracle DBA关心oracle系统ORA-的异常信息，mysql DBA关心mysql数据库相关异常)</li>
+<li>process超时(一个批次数据执行超过多少时间)，同步时间超时(数据超过多少时间没有同步成功过)</li>
+</ul>
+<p>2.阀值设置</p>
+<p>1800@09:00-18:00 , 这例子是指定了早上9点到下午6点，报警阀值为1800.</p>
+<p>3.发送对象</p>
+<p>otterteam为otter团队的标识，阿里内部使用了dragoon系统监控报警通知，如果外部系统可实现自己的报警通知机制<br><strong>日志记录</strong><br><img src="https://upload-images.jianshu.io/upload_images/13935362-493d0067c2eea9d3?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"></p>
+<p>说明：</p>
+<ol>
+<li>日志标题即为对应的监控规则定义的名字，可根据监控规则检索对应的日志记录</li>
+<li>日志内容即为发送报警的信息<br>注意： otter4采用主动推送报警的模式，可以保证报警的及时性以及日志完整性(相比于日志文件扫描机制来说)</li>
+</ol>
+<h3 id="3-2-6-配置管理"><a href="#3-2-6-配置管理" class="headerlink" title="3.2.6 配置管理"></a>3.2.6 配置管理</h3><p><strong>数据源</strong><br><img src="https://upload-images.jianshu.io/upload_images/13935362-849fdf2a7c5af559?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"></p>
+<p>说明：</p>
+<ul>
+<li>主要是数据库连接信息：定义字符编码，ip地址等 (类似napoli等存储也可以抽象为数据源进行配置)</li>
+<li>切换数据库时，可根据ip检索同步数据库，找到需要切换的同步任务</li>
+</ul>
+<p><strong>数据表</strong><br><img src="https://upload-images.jianshu.io/upload_images/13935362-91eded13b8da0974?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"><br>说明：</p>
+<ul>
+<li>数据表是一种抽象概念，(针对数据库类型即为一个数据库表的定义)</li>
+</ul>
+<p><strong>canal配置</strong><br>说明：主要是管理canal链接到mysql/oracle获取日志的相关参数等，业务方可不重点关注</p>
+<p><strong>机器管理</strong><br><img src="https://upload-images.jianshu.io/upload_images/13935362-5f81455059558a55?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"></p>
+<h1 id="映射规则配置"><a href="#映射规则配置" class="headerlink" title="映射规则配置"></a>映射规则配置</h1><h1 id="1-背景"><a href="#1-背景" class="headerlink" title="1.背景"></a>1.背景</h1><p>因为alibaba的特殊业务，比如：</p>
+<ol>
+<li>同步数据同时，需要同步数据关联的文件 (需要做数据join)</li>
+<li>同步会员数据，敏感字段信息不能同步到美国站点. (需要做数据过滤)</li>
+<li>两地机房的数据库可能为异构数据库，(需要做字段类型，名字等转化.)<br>为解决这些业务，otter引入了映射规则这一概念，用于描述这样的一种同步业务的关系，其粒度可以精确到一张表，或者是一整个库.</li>
+</ol>
+<h1 id="2-映射规则"><a href="#2-映射规则" class="headerlink" title="2.映射规则"></a>2.映射规则</h1><h2 id="2-1-表映射"><a href="#2-1-表映射" class="headerlink" title="2.1 表映射"></a>2.1 表映射</h2><p>otter中每个pipeline可以设置多个映射规则，每个映射规则描述一个数据库同步的内容，比如源表是哪张，同步到哪张目标表。<br><img src="https://upload-images.jianshu.io/upload_images/13935362-7e4e32172828c8cf?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"></p>
+<h3 id="2-1-1-权重的概念"><a href="#2-1-1-权重的概念" class="headerlink" title="2.1.1 权重的概念"></a>2.1.1 权重的概念</h3><p>可以先看下：Otter数据入库算法 ， 因为otter采用了pk hash的并行载入算法，会将原先binlog中的事务进行打散做并行处理提升同步性能。原先事务被拆散后，通过这个权重概念，来提供“业务上类事务功能”.</p>
+<p>举个实际点的例子来看：</p>
+<ul>
+<li>比如有两张表，product(记录产品的属性信息)和product_detail(记录产品的详情信息)，product_detail上有个字段为product_id与product进行关联. 目前为1:1的关系</li>
+<li>业务上插入数据可以通过事务，先插入product，然后插入product_detail，最后一起提交到数据库. 正常，页面上通过查询用户的product表的数据，发现有产品记录，然后通过product_id去查询product_detail表，查到后才显示产品页面</li>
+<li>假如同步到目标库后，打散事务后，同步过程如果先插入了product表，后插入product_detail表，这时如果有用户访问该产品记录，可能就会遇到product_detail不存在的情况，从而导致页面出错.</li>
+<li>所以，我们通过权重定义，比如将product_detail权重定义为5，将product定义为10。 otter会优先同步权重低的表数据，最终可以保证查询product有数据后，product_detail一定有数据，避免业务出错.<h2 id="2-2-视图映射"><a href="#2-2-视图映射" class="headerlink" title="2.2 视图映射"></a>2.2 视图映射</h2>如何进入视图编辑：<br><img src="https://upload-images.jianshu.io/upload_images/13935362-6c08a48f2a3cb44a?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"><br>点击下一步后，进入视图编辑页面：<br><img src="https://upload-images.jianshu.io/upload_images/13935362-eb836a5c4071bb4c?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"></li>
+</ul>
+<p>说明：</p>
+<ul>
+<li>映射规则配置页面，可以选择视图模式为：include或exclude，代表正向匹配或者逆向排除.</li>
+<li>视图配置页面，只支持存在的数据表(因为要获取数据表结构，所以.*等正则的数据表不支持配置该功能)</li>
+<li>视图配置列表，左右选中列表会按照顺序进行对应，做映射时需按照顺序进行选择.<br>举个例子：</li>
+</ul>
+<p>如果要排除表字段A的同步，则只需要选择为exclude模式，然后视图编辑页面选择左右皆选择A字段即可，点击保存.</p>
+<h2 id="2-3-字段组映射"><a href="#2-3-字段组映射" class="headerlink" title="2.3 字段组映射"></a>2.3 字段组映射</h2><p>首先解释一下，需要字段组同步的需求.</p>
+<ol>
+<li>文件同步. 一条记录对应的图片，可能会有一个或者多个字段，比如会有image_path,image_version来决定图片，所以我们可以定义这两个字段为一组，只要满足组内任意一个字段的变更，就会认为需要文件同步.</li>
+<li>数据上的组同步，比如国家，省份，城市，可能在数据库为三个字段. 如果是双A同步，两地同时修改这些字段，但业务上可能在A地修改了国家为美国，在B地修改为省份为浙江，然后一同步，最终就会变成美国，浙江这样的情况. 这种情况可以通过group来解决，将国家，省份，城市做一个group，组内任何一个字段发生了变更，其余字段会做为整体一起变更.<br>再来看一下配置：(点击视图编辑页面的下一步，即可进入)<br><img src="https://upload-images.jianshu.io/upload_images/13935362-851b3c84874420ac?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"></li>
+</ol>
+<p>说明：也可不配置视图，单独配置字段组，此时可选择的字段即为当前所有字段(映射规则按照同名映射).</p>
+<h1 id="3-高级映射"><a href="#3-高级映射" class="headerlink" title="3.高级映射"></a>3.高级映射</h1><p>主要分为两类：</p>
+<ol>
+<li>文件同步</li>
+<li>自定义数据同步<br>具体代码扩展方式和配置可参见： Otter扩展性</li>
+</ol>
+<p>配置方式：<br><img src="https://upload-images.jianshu.io/upload_images/13935362-1094307712c91f25?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"></p>
+<h2 id="3-1-文件同步"><a href="#3-1-文件同步" class="headerlink" title="3.1 文件同步"></a>3.1 文件同步</h2><p>首先解释一下文件同步的需求，阿里巴巴国际站业务，主要模式为对外贸易，卖家基本在国内，买家在国外. 所以，目前我们的机房部署为杭州和美国各一个，卖家访问杭州机房，买家访问美国机房。卖家在国内发布产品和图片，通过otter同步到美国，同步产品数据记录的同时，同样需要把图片同步过去，保证买家用户的访问体验. 所以，基于这个业务场景，衍生出了文件同步的需求.</p>
+<p>所以，做文件同步的几个前提：</p>
+<ol>
+<li>异地同步 (需要部署为两个node，S/E和T/L分为两地. )</li>
+<li>数据触发文件同步 (数据库记录做为类似文件索引信息，不支持单独同步文件)</li>
+<li>本地文件同步 (需要同步的文件需要和node部署在一台机器上或者通过nfs mount，如果要同步 公司自带的分布式文件系统的数据，otter需要做额外扩展)</li>
+</ol>
+<p>文件同步准备工作：</p>
+<ol>
+<li>准备两台机器，分别部署上两个node</li>
+<li>配置channel/pipeline同步，配置映射规则</li>
+<li>编写FileResolver解析类，根据binlog中的变更数据，转化为文件的路径信息. 例子：TestFileResolver</li>
+<li><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">public class TestFileResolver extends AbstractFileResolver &#123;</span><br><span class="line">public FileInfo[] getFileInfo(Map&amp;lt;String, String&amp;gt; rowMap) &#123;</span><br><span class="line">    // 基本步骤：</span><br><span class="line">    // 1. 获取binlog中的变更字段，比如组成文件有多个字段组成version+path</span><br><span class="line">    // 2. 基于字段内容，构造一个文件路径，目前开源版本只支持本地文件的同步.(如果是网络文件，建议进行NFS mount到ndde机器).</span><br><span class="line">    // 3. 返回FileInfo数组，(目前不支持目录同步，如果是目录需要展开为多个FileInfo的子文件)，如果不需要同步，则返回null.</span><br><span class="line">    String path = rowMap.get(&quot;FIELD&quot;); //注意为大写</span><br><span class="line">    FileInfo fileInfo = null;</span><br><span class="line">    if (StringUtils.isNotEmpty(path)) &#123;</span><br><span class="line">        fileInfo = new FileInfo(path);</span><br><span class="line">        return new FileInfo[] &#123; fileInfo &#125;;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        return null;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h2 id="3-2-自定义数据同步"><a href="#3-2-自定义数据同步" class="headerlink" title="3.2 自定义数据同步"></a>3.2 自定义数据同步</h2><p>通过前面的字段视图映射，或许可以解决80%的需求，但总会有一小撮的特殊用户，希望可以自定义自己的同步数据内容，所以otter引入了自定义数据同步为EventProcessor，允许你任意改变整个同步过程中的数据内容.</p>
+<p>可以支持的需求：</p>
+<ol>
+<li><p>根据字段内容，判断是否需要屏蔽本记录同步</p>
+</li>
+<li><p>动态增加/减少字段</p>
+</li>
+<li><p>动态修改字段内容</p>
+</li>
+<li><p>动态改变事件类型(Insert/Update/Delete)<br>几点注意：</p>
+</li>
+<li><p>EventProcessor主要是在E模块进行数据处理，也就是EventProcessor处理后的数据，会再次经过视图配置，字段组映射，文件同步，最后进入Transform处理.</p>
+</li>
+<li><p>EventProcessor修改数据中的schema/table name需要谨慎，因为会继续后续的E/T/L流程，所以需要保证修改后的name在映射规则列表里有配置，否则同步会出错.<br>一个例子：(比如我想将源库的每条binlog变更，记录到一个日志表binlog，映射规则配置为.*所有表的同步)</p>
+</li>
+</ol>
+<p>代码：TestEventProcessor</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br></pre></td><td class="code"><pre><span class="line">public class TestEventProcessor extends AbstractEventProcessor &#123;</span><br><span class="line">public boolean process(EventData eventData) &#123;</span><br><span class="line">    // 基本步骤：</span><br><span class="line">    // 1. 获取binlog中的变更字段</span><br><span class="line">    // 2. 根据业务逻辑进行判断，如果需要忽略本条数据同步，直接返回false，否则返回true</span><br><span class="line">    // 3. 根据业务逻辑进行逻辑转化，比如可以修改整个EventData数据.  </span><br><span class="line"></span><br><span class="line">    // 本文例子：源库的每条binlog变更，记录到一个日志表binlog</span><br><span class="line">    // create table test.binlog(</span><br><span class="line">    //        id bigint(20) auto_increment,</span><br><span class="line">    //        oschema varchar(256),</span><br><span class="line">    //        otable varchar(256),</span><br><span class="line">    //        gtime varchar(32)</span><br><span class="line">    //        ovalue text,</span><br><span class="line">    //        primary key(id);</span><br><span class="line">    //    )</span><br><span class="line">    // 在process处理中，可以修改EventData的任何数据，达到数据转换的效果, just have fun.</span><br><span class="line">    JSONObject col = new JSONObject();</span><br><span class="line">    JSONArray array = new JSONArray();</span><br><span class="line">    for (EventColumn column : eventData.getColumns()) &#123;</span><br><span class="line">        JSONObject obj = this.doColumn(column);</span><br><span class="line">        array.add(obj);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    for (EventColumn key : eventData.getKeys()) &#123;</span><br><span class="line">        JSONObject obj = this.doColumn(key);</span><br><span class="line">        array.add(obj);</span><br><span class="line">    &#125;</span><br><span class="line">    // 记录原始的表信息</span><br><span class="line">    col.put(&quot;schema&quot;, eventData.getSchemaName());</span><br><span class="line">    col.put(&quot;table&quot;, eventData.getTableName());</span><br><span class="line">    col.put(&quot;columns&quot;, array);</span><br><span class="line">    col.put(&quot;dml&quot;, eventData.getEventType());</span><br><span class="line">    col.put(&quot;exectime&quot;, eventData.getExecuteTime());</span><br><span class="line"></span><br><span class="line">    // 构造新的主键</span><br><span class="line">    EventColumn id = new EventColumn();</span><br><span class="line">    id.setColumnValue(eventData.getSchemaName());</span><br><span class="line">    id.setColumnType(Types.BIGINT);</span><br><span class="line">    id.setColumnName(&quot;id&quot;);</span><br><span class="line">    // 构造新的字段</span><br><span class="line">    EventColumn schema = new EventColumn();</span><br><span class="line">    schema.setColumnValue(eventData.getSchemaName());</span><br><span class="line">    schema.setColumnType(Types.VARCHAR);</span><br><span class="line">    schema.setColumnName(&quot;oschema&quot;);</span><br><span class="line"></span><br><span class="line">    EventColumn table = new EventColumn();</span><br><span class="line">    table.setColumnValue(eventData.getTableName());</span><br><span class="line">    table.setColumnType(Types.VARCHAR);</span><br><span class="line">    table.setColumnName(&quot;otable&quot;);</span><br><span class="line"></span><br><span class="line">    EventColumn ovalue = new EventColumn();</span><br><span class="line">    ovalue.setColumnValue(col.toJSONString());</span><br><span class="line">    ovalue.setColumnType(Types.VARCHAR);</span><br><span class="line">    ovalue.setColumnName(&quot;ovalue&quot;);</span><br><span class="line"></span><br><span class="line">    EventColumn gtime = new EventColumn();</span><br><span class="line">    gtime.setColumnValue(eventData.getExecuteTime() + &quot;&quot;);</span><br><span class="line">    gtime.setColumnType(Types.VARCHAR);</span><br><span class="line">    gtime.setColumnName(&quot;gtime&quot;);</span><br><span class="line"></span><br><span class="line">    // 替换为新的字段和主键信息</span><br><span class="line">    List&amp;lt;EventColumn&amp;gt; cols = new ArrayList&amp;lt;EventColumn&amp;gt;();</span><br><span class="line">    cols.add(schema);</span><br><span class="line">    cols.add(table);</span><br><span class="line">    cols.add(gtime);</span><br><span class="line">    cols.add(ovalue);</span><br><span class="line">    eventData.setColumns(cols);</span><br><span class="line"></span><br><span class="line">    List&amp;lt;EventColumn&amp;gt; keys = new ArrayList&amp;lt;EventColumn&amp;gt;();</span><br><span class="line">    keys.add(id);</span><br><span class="line">    eventData.setKeys(keys);</span><br><span class="line"></span><br><span class="line">    //修改数据meta信息</span><br><span class="line">    eventData.setEventType(EventType.INSERT);</span><br><span class="line">    eventData.setSchemaName(&quot;test&quot;);</span><br><span class="line">    eventData.setTableName(&quot;binlog&quot;);</span><br><span class="line">    return true;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private JSONObject doColumn(EventColumn column) &#123;</span><br><span class="line">    JSONObject obj = new JSONObject();</span><br><span class="line">    obj.put(&quot;name&quot;, column.getColumnName());</span><br><span class="line">    obj.put(&quot;update&quot;, column.isUpdate());</span><br><span class="line">    obj.put(&quot;key&quot;, column.isKey());</span><br><span class="line">    if (column.getColumnType() != Types.BLOB &amp;amp;&amp;amp; column.getColumnType() != Types.CLOB) &#123;</span><br><span class="line">        obj.put(&quot;value&quot;, column.getColumnValue());</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        obj.put(&quot;value&quot;, &quot;&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    return obj;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/wechat-qcode.jpg" alt="林夕_Yume wechat" style="width: 200px; max-width: 100%;">
+    <div>欢迎您订阅我的公众号!</div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持分享，您的支持是我创作的动力!</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="林夕_Yume 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Otter/" rel="tag"># Otter</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/07/27/3.Otter快速上手/" rel="next" title="3.Otter快速上手">
+                <i class="fa fa-chevron-left"></i> 3.Otter快速上手
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/07/27/5.Otter常见问题/" rel="prev" title="5.Otter常见问题">
+                5.Otter常见问题 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/monkey.jpg" alt="林夕_Yume">
+            
+              <p class="site-author-name" itemprop="name">林夕_Yume</p>
+              <p class="site-description motion-element" itemprop="description">一个分享自己经历，感触以及工作成长的地方。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-globe"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.jianshu.com/u/3fa2b243f30d" title="林夕_Yume的简书" target="_blank">林夕_Yume的简书</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Adminguide"><span class="nav-number">1.</span> <span class="nav-text">Adminguide</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-几点说明"><span class="nav-number">2.</span> <span class="nav-text">1.几点说明</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-Manager配置介绍"><span class="nav-number">3.</span> <span class="nav-text">2.Manager配置介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-操作演示"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 操作演示</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-通道配置说明"><span class="nav-number">3.2.</span> <span class="nav-text">2.2 通道配置说明</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-1-多种同步方式配置"><span class="nav-number">3.2.1.</span> <span class="nav-text">2.2.1 多种同步方式配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#a-单向同步"><span class="nav-number">3.2.1.1.</span> <span class="nav-text">a. 单向同步</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#b-双向同步"><span class="nav-number">3.2.1.2.</span> <span class="nav-text">b. 双向同步</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#c-双A同步"><span class="nav-number">3.2.1.3.</span> <span class="nav-text">c. 双A同步</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#d-级联同步"><span class="nav-number">3.2.1.4.</span> <span class="nav-text">d. 级联同步</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#e-多A同步"><span class="nav-number">3.2.1.5.</span> <span class="nav-text">e. 多A同步</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-2-自定义数据同步-自-由-门"><span class="nav-number">3.2.2.</span> <span class="nav-text">2.2.2 自定义数据同步(自 由 门)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-具体参数详解"><span class="nav-number">3.3.</span> <span class="nav-text">2.3 具体参数详解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-1-channel参数"><span class="nav-number">3.3.1.</span> <span class="nav-text">2.3.1 channel参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-2-pipeline参数"><span class="nav-number">3.3.2.</span> <span class="nav-text">2.3.2 pipeline参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-3-Canal参数"><span class="nav-number">3.3.3.</span> <span class="nav-text">2.3.3 Canal参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-4-Node参数"><span class="nav-number">3.3.4.</span> <span class="nav-text">2.3.4 Node参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-5-Zookeeper集群参数"><span class="nav-number">3.3.5.</span> <span class="nav-text">2.3.5 Zookeeper集群参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-6-主备配置参数"><span class="nav-number">3.3.6.</span> <span class="nav-text">3.6 主备配置参数</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-Manager使用介绍"><span class="nav-number">4.</span> <span class="nav-text">3. Manager使用介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-背景"><span class="nav-number">4.1.</span> <span class="nav-text">3.1 背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-otter4管理系统-manager"><span class="nav-number">4.2.</span> <span class="nav-text">3.2 otter4管理系统(manager)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-1-系统登录"><span class="nav-number">4.2.1.</span> <span class="nav-text">3.2.1 系统登录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-2-同步管理"><span class="nav-number">4.2.2.</span> <span class="nav-text">3.2.2 同步管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-3-同步模式配置"><span class="nav-number">4.2.3.</span> <span class="nav-text">3.2.3 同步模式配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-4-同步简要信息"><span class="nav-number">4.2.4.</span> <span class="nav-text">3.2.4 同步简要信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-5同步详细信息"><span class="nav-number">4.2.5.</span> <span class="nav-text">3.2.5同步详细信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-6-配置管理"><span class="nav-number">4.2.6.</span> <span class="nav-text">3.2.6 配置管理</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#映射规则配置"><span class="nav-number">5.</span> <span class="nav-text">映射规则配置</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-背景"><span class="nav-number">6.</span> <span class="nav-text">1.背景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-映射规则"><span class="nav-number">7.</span> <span class="nav-text">2.映射规则</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-表映射"><span class="nav-number">7.1.</span> <span class="nav-text">2.1 表映射</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-1-权重的概念"><span class="nav-number">7.1.1.</span> <span class="nav-text">2.1.1 权重的概念</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-视图映射"><span class="nav-number">7.2.</span> <span class="nav-text">2.2 视图映射</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-字段组映射"><span class="nav-number">7.3.</span> <span class="nav-text">2.3 字段组映射</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-高级映射"><span class="nav-number">8.</span> <span class="nav-text">3.高级映射</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-文件同步"><span class="nav-number">8.1.</span> <span class="nav-text">3.1 文件同步</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-自定义数据同步"><span class="nav-number">8.2.</span> <span class="nav-text">3.2 自定义数据同步</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">林夕_Yume</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Otter,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Introduction项目介绍名称：otter [‘ɒtə(r)] 译意： 水獭，数据搬运工 语言： 纯java开发 定位： 基于数据库增量日志解析，准实时同步到本机房或异地机房的mysql/oracle数据库. 工作原理原理描述：  基于Canal开源产品，获取数据库增量日志数据。 什么是Canal：https://github.com/alibaba/canal  典型管理系统架构，mana">
+<meta name="keywords" content="Otter">
+<meta property="og:type" content="article">
+<meta property="og:title" content="2.Otter原理介绍">
+<meta property="og:url" content="http://yoursite.com/2019/07/27/2.Otter原理介绍/index.html">
+<meta property="og:site_name" content="林夕的部落格">
+<meta property="og:description" content="Introduction项目介绍名称：otter [‘ɒtə(r)] 译意： 水獭，数据搬运工 语言： 纯java开发 定位： 基于数据库增量日志解析，准实时同步到本机房或异地机房的mysql/oracle数据库. 工作原理原理描述：  基于Canal开源产品，获取数据库增量日志数据。 什么是Canal：https://github.com/alibaba/canal  典型管理系统架构，mana">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-5f7f4aac1e64bab9?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-e082262ad74ab738.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-b8a7afee87e2a766?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-2dc50b4e13720caf?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-123c5cb896c0e478?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-63cf674bb8e4e975?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-621b63b4fd311e68?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-059f30657d8d1b98?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-82eb56c20f964024?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-a7f1800c2a616f17?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-5124aa42a424bff0?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-615f8a815d7f87ca?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-668a90f61e85836c?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/13935362-f6ab20058d06a963?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2019-07-27T04:51:29.271Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="2.Otter原理介绍">
+<meta name="twitter:description" content="Introduction项目介绍名称：otter [‘ɒtə(r)] 译意： 水獭，数据搬运工 语言： 纯java开发 定位： 基于数据库增量日志解析，准实时同步到本机房或异地机房的mysql/oracle数据库. 工作原理原理描述：  基于Canal开源产品，获取数据库增量日志数据。 什么是Canal：https://github.com/alibaba/canal  典型管理系统架构，mana">
+<meta name="twitter:image" content="https://upload-images.jianshu.io/upload_images/13935362-5f7f4aac1e64bab9?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/07/27/2.Otter原理介绍/">
+
+
+
+
+
+  <title>2.Otter原理介绍 | 林夕的部落格</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">林夕的部落格</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">惟有不相忘，可抵岁月长！</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/27/2.Otter原理介绍/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="林夕_Yume">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/monkey.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="林夕的部落格">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">2.Otter原理介绍</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-07-27T12:51:29+08:00">
+                2019-07-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/实用技术/" itemprop="url" rel="index">
+                    <span itemprop="name">实用技术</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/实用技术/Otter/" itemprop="url" rel="index">
+                    <span itemprop="name">Otter</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h1><h1 id="项目介绍"><a href="#项目介绍" class="headerlink" title="项目介绍"></a>项目介绍</h1><p>名称：otter [‘ɒtə(r)]</p>
+<p>译意： 水獭，数据搬运工</p>
+<p>语言： 纯java开发</p>
+<p>定位： 基于数据库增量日志解析，准实时同步到本机房或异地机房的mysql/oracle数据库.</p>
+<h1 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h1><p><img src="https://upload-images.jianshu.io/upload_images/13935362-5f7f4aac1e64bab9?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"><br>原理描述：</p>
+<ol>
+<li><p>基于Canal开源产品，获取数据库增量日志数据。 什么是Canal：<a href="https://github.com/alibaba/canal" target="_blank" rel="noopener">https://github.com/alibaba/canal</a></p>
+</li>
+<li><p>典型管理系统架构，manager(web管理)+node(工作节点)</p>
+<p> a. manager运行时推送同步配置到node节点</p>
+<p> b. node节点将同步状态反馈到manager上</p>
+</li>
+<li><p>基于zookeeper，解决分布式状态调度的，允许多node节点之间协同工作.</p>
+</li>
+</ol>
+<h1 id="otter能解决什么？"><a href="#otter能解决什么？" class="headerlink" title="otter能解决什么？"></a>otter能解决什么？</h1><ol>
+<li><p>异构库同步</p>
+<p> a. mysql -&gt; mysql/oracle. (目前开源版本只支持mysql增量，目标库可以是mysql或者oracle，取决于canal的功能)</p>
+</li>
+<li><p>单机房同步 (数据库之间RTT &lt; 1ms)</p>
+<p> a. 数据库版本升级</p>
+<p> b. 数据表迁移</p>
+<p> c. 异步二级索引</p>
+</li>
+<li><p>异地机房同步 (比如阿里巴巴国际站就是杭州和美国机房的数据库同步，RTT &gt; 200ms，亮点)</p>
+<p> a. 机房容灾</p>
+</li>
+<li><p>双向同步</p>
+<p> a. 避免回环算法 (通用的解决方案，支持大部分关系型数据库)</p>
+<p> b. 数据一致性算法 (保证双A机房模式下，数据保证最终一致性，亮点)</p>
+</li>
+<li><p>文件同步</p>
+<p> a. 站点镜像 (进行数据复制的同时，复制关联的图片，比如复制产品数据，同时复制产品图片).</p>
+</li>
+</ol>
+<h2 id="单机房复制示意图："><a href="#单机房复制示意图：" class="headerlink" title="单机房复制示意图："></a>单机房复制示意图：</h2><p><img src="https://upload-images.jianshu.io/upload_images/13935362-e082262ad74ab738.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="屏幕快照 2019-06-03 下午1.29.50.png"></p>
+<p>说明：</p>
+<p>   a. 数据on-Fly，尽可能不落地，更快的进行数据同步. (开启node loadBalancer算法，如果Node节点S+ETL落在不同的Node上，数据会有个网络传输过程)</p>
+<p>   b. node节点可以有failover / loadBalancer.</p>
+<h2 id="异地机房复制示意图："><a href="#异地机房复制示意图：" class="headerlink" title="异地机房复制示意图："></a>异地机房复制示意图：</h2><p><img src="https://upload-images.jianshu.io/upload_images/13935362-b8a7afee87e2a766?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"></p>
+<p>说明：</p>
+<p>   a. 数据涉及网络传输，S/E/T/L几个阶段会分散在2个或者更多Node节点上，多个Node之间通过zookeeper进行协同工作 (一般是Select和Extract在一个机房的Node，Transform/Load落在另一个机房的Node)</p>
+<p>   b. node节点可以有failover / loadBalancer. (每个机房的Node节点，都可以是集群，一台或者多台机器)</p>
+<h2 id="初步性能指标："><a href="#初步性能指标：" class="headerlink" title="初步性能指标："></a>初步性能指标：</h2><ol>
+<li><p>单机房同步</p>
+<p>a. 100tps ， 延迟100ms</p>
+<p>b. 5000tps, 延迟1s</p>
+</li>
+<li><p>中美异地机房同步</p>
+<p>a. 100tps ， 延迟2s</p>
+<p>b. 5000tps ，延迟10s</p>
+</li>
+</ol>
+<p>ps. 性能指标取决于目标数据库性能，数据大小等多个因素，单机房100b大小，极限tps可以1w+</p>
+<h1 id="相关名词解释"><a href="#相关名词解释" class="headerlink" title="相关名词解释"></a>相关名词解释</h1><h2 id="otter核心model关系图"><a href="#otter核心model关系图" class="headerlink" title="otter核心model关系图"></a>otter核心model关系图</h2><p><img src="https://upload-images.jianshu.io/upload_images/13935362-2dc50b4e13720caf?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"></p>
+<h2 id="名词解释"><a href="#名词解释" class="headerlink" title="名词解释"></a>名词解释</h2><ul>
+<li>Pipeline：从源端到目标端的整个过程描述，主要由一些同步映射过程组成</li>
+<li>Channel：同步通道，单向同步中一个Pipeline组成，在双向同步中有两个Pipeline组成</li>
+<li>DataMediaPair：根据业务表定义映射关系，比如源表和目标表，字段映射，字段组等</li>
+<li>DataMedia : 抽象的数据介质概念，可以理解为数据表/mq队列定义</li>
+<li>DataMediaSource : 抽象的数据介质源信息，补充描述DateMedia</li>
+<li>ColumnPair : 定义字段映射关系</li>
+<li>ColumnGroup : 定义字段映射组</li>
+<li>Node : 处理同步过程的工作节点，对应一个jvm</li>
+</ul>
+<hr>
+<h2 id="otter的S-E-T-L-stage阶段模型"><a href="#otter的S-E-T-L-stage阶段模型" class="headerlink" title="otter的S/E/T/L stage阶段模型"></a>otter的S/E/T/L stage阶段模型</h2><p><img src="https://upload-images.jianshu.io/upload_images/13935362-123c5cb896c0e478?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"></p>
+<p>说明：为了更好的支持系统的扩展性和灵活性，将整个同步流程抽象为Select/Extract/Transform/Load，这么4个阶段.<br>Select阶段: 为解决数据来源的差异性，比如接入canal获取增量数据，也可以接入其他系统获取其他数据等。</p>
+<p>Extract/Transform/Load 阶段：类似于数据仓库的ETL模型，具体可为数据join，数据转化，数据Load的</p>
+<h1 id="Otter调度模型"><a href="#Otter调度模型" class="headerlink" title="Otter调度模型"></a>Otter调度模型</h1><h1 id="1-背景"><a href="#1-背景" class="headerlink" title="1.背景"></a>1.背景</h1><p>在介绍调度模型之前，首先了解一下otter系统要解决的异地机房的网络环境.</p>
+<ol>
+<li>中美网络延迟 (平均200ms)</li>
+<li>中美传输速度 (2~6MB/s)<br>网络因素是一个很重要的问题，</li>
+</ol>
+<ul>
+<li>比如中美网络延迟RTT，平均为200ms，这直接会影响整个系统的架构设计。</li>
+</ul>
+<p>试想一下，发送一条binlog一次RTT 200ms，那是否意味着单线程1秒钟只能发送5条。不过tcp在解决这类问题时，有自己的一套优化算法，叫做滑动窗口，它发送数据可能一次性发了10条，然后一起等返回结果，这样可以提升传输效率，但始终无法满足1秒传输1w+记录的需求。这也就决定了，需要对发送的binlog做批处理，一次性发送尽可能多的数据，然后一起等结果.</p>
+<ul>
+<li>比如中美单socket的带宽只有2～6MB，这直接会影响整个系统的架构设计。</li>
+</ul>
+<p>试想一下，假定一binlog平均1kb，那6MB最多只有6000条数据，也就意味着最大的同步tps只有6000? 而且很多业务的mysql都是共享，也就是6000个binlog对象中，可能只有三分之一或者四分之一是某个业务的，这肯定是无法满足要求的。所以，基于带宽的问题，决定otter架构必须是双节点部署，在杭州一个节点，美国一个节点，杭州这边对数据做加速同步处理，然后快速传递到美国.</p>
+<p>基于这两个因素，决定了： batch处理 + 双节点部署的架构.</p>
+<h1 id="2-调度模型"><a href="#2-调度模型" class="headerlink" title="2.调度模型"></a>2.调度模型</h1><p><img src="https://upload-images.jianshu.io/upload_images/13935362-63cf674bb8e4e975?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"></p>
+<p>在正式介绍otter调度模型之前，我们首先得了解TCP/IP协议在解决此类”差网络”环境的一些处理方案，从中借鉴相应的方案.</p>
+<h2 id="2-1-Nagle算法"><a href="#2-1-Nagle算法" class="headerlink" title="2.1 Nagle算法"></a>2.1 Nagle算法</h2><p>通过Canal解决Nagle算法，Canal之前是做为otter的一个子项目，为解决otter的数据增量获取的机制，并为otter项目的特点而量身打造了几个feature.</p>
+<p>Canal的处理：</p>
+<p>   a. 构建RingBuffer (可以基于内存控制模式/数量控制模式)</p>
+<p>   b. 允许客户端指定batchSize获取</p>
+<pre><code>i. 内存大小
+
+ii. 记录数</code></pre><p>   c. 指定定batchSize + timeout获取</p>
+<pre><code>i. timeout = -1 ,即时获取，有多少取多少
+
+ii. timeout = 0，阻塞至满足batchSize条件
+
+iii. timeout &gt; 0，阻塞指定的时间或者满足batchSize.</code></pre><p>建议值：batchSize=4000(约4M) , timeout=500，内存控制模式</p>
+<h2 id="2-2-滑动窗口"><a href="#2-2-滑动窗口" class="headerlink" title="2.2 滑动窗口"></a>2.2 滑动窗口</h2><p><img src="https://upload-images.jianshu.io/upload_images/13935362-621b63b4fd311e68?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"></p>
+<p>说明：</p>
+<ol>
+<li>otter通过select模块串行获取canal的批数据，注意是串行获取，每批次获取到的数据，就会有一个全局标识，otter里称之为processId.</li>
+<li>select模块获取到数据后，将其传递给后续的ETL模型. 这里E和T模块会是一个并行处理</li>
+<li>将数据最后传递到Load时，会根据每批数据对应的processId，按照顺序进行串行加载。 ( 比如有一个processId=2的数据先到了Load模块，但会阻塞等processId=1的数据Load完成后才会被执行)</li>
+<li>简单一点说，Select/Load模块会是一个串行机制来保证binlog处理的顺序性，Extract/Transform会是一个并行，加速传输效率.</li>
+</ol>
+<h3 id="2-2-1-并行度"><a href="#2-2-1-并行度" class="headerlink" title="2.2.1 并行度"></a>2.2.1 并行度</h3><p>类似于tcp滑动窗口大小，比如整个滑动窗口设置了并行度为5时，只有等第一个processId Load完成后，第6个Select才会去获取数据。</p>
+<h3 id="2-2-2-数据可靠性"><a href="#2-2-2-数据可靠性" class="headerlink" title="2.2.2 数据可靠性"></a>2.2.2 数据可靠性</h3><ul>
+<li>如何保证数据不丢：2pc. (get/ack)</li>
+<li>如何处理重传协议：get/ack/rollback</li>
+<li>如何支持并行化：多get cursor+ack curosr (可以参看Canal的异步ACK模型)</li>
+</ul>
+<h3 id="2-2-3-编程模型抽象-SEDA模型"><a href="#2-2-3-编程模型抽象-SEDA模型" class="headerlink" title="2.2.3 编程模型抽象(SEDA模型)"></a>2.2.3 编程模型抽象(SEDA模型)</h3><p><img src="https://upload-images.jianshu.io/upload_images/13935362-059f30657d8d1b98?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"></p>
+<p>说明： 将并行化调度的串行/并行处理，进行隐藏，抽象了await/single的接口，整个调度称之为仲裁器。(有了这层抽象，不同的仲裁器实现可以解决同机房，异地机房的同步需求)</p>
+<p>模型接口：</p>
+<ul>
+<li><p>await模拟object获取锁操作</p>
+</li>
+<li><p>notify被唤醒后提交任务到thread pools</p>
+</li>
+<li><p>single模拟object释放锁操作，触发下一个stage<br>这里使用了SEDA模型的优势：</p>
+</li>
+<li><p>共享thread pool，解决流控机制</p>
+</li>
+<li><p>划分多stage，提升资源利用率</p>
+</li>
+<li><p>统一编程模型，支持同机房，跨机房不同的调度算法</p>
+<h3 id="仲裁器算法"><a href="#仲裁器算法" class="headerlink" title="仲裁器算法"></a>仲裁器算法</h3><p>主要包括： 令牌生成(processId) + 事件通知.</p>
+</li>
+</ul>
+<p>令牌生成：</p>
+<ul>
+<li><p>基于AtomicLong.inc()机制，(纯内存机制，解决同机房，单节点同步需求，不需要多节点交互)</p>
+</li>
+<li><p>基于zookeeper的自增id机制，(解决异地机房，多节点协作同步需求)<br>事件通知： (简单原理： 每个stage都会有个block queue，接收上一个stage的single信号通知，当前stage会阻塞在该block queue上，直到有信号通知)</p>
+</li>
+<li><p>block queue + put/take方法，(纯内存机制)</p>
+</li>
+<li><p>block queue + rpc + put/take方法 (两个stage对应的node不同，需要rpc调用，需要依赖负载均衡算法解决node节点的选择问题)</p>
+</li>
+<li><p>block queue + zookeeper watcher ()<br>负载均衡算法：</p>
+</li>
+<li><p>Stick : 类似于session stick技术，一旦第一次选择了node，下一次选择会继续使用该node. (有一个好处，资源上下文缓存命中率高)</p>
+</li>
+<li><p>Random : 随机算法</p>
+</li>
+<li><p>RoundRbin ： 轮询算法<br>注意点：每个node节点，都会在zookeeper中生成Ephemeral节点，每个node都会缓存住当前存活的node列表，node节点消失，通过zookeeper watcher机制刷新每个node机器的内存。然后针对每次负载均衡选择时只针对当前存活的节点，保证调度的可靠性。</p>
+</li>
+</ul>
+<h3 id="2-2-4-调度算法成本估算"><a href="#2-2-4-调度算法成本估算" class="headerlink" title="2.2.4 调度算法成本估算"></a>2.2.4 调度算法成本估算</h3><p>中美网络RTT = 200ms , zookeeper一次写入=10ms</p>
+<p>调度成本估算：</p>
+<pre><code>a. zookeeper + zookeeper watch (完全分布式)
+
+   10 * 4 + 200 * 2 + 200 = 640ms
+
+b. zookeeper + rpc (sticky分布式，尽可能选择同节点)
+
+10 + 100 + 200 = 310ms
+
+c. memory + memory (内存调度，单机房)
+
+   0ms
+
+d. memory + rpc (跨机房调度，最优实现，待完成??)
+
+   0 + 100 + 100 = 200ms</code></pre><h3 id="2-2-5-数据传输"><a href="#2-2-5-数据传输" class="headerlink" title="2.2.5 数据传输"></a>2.2.5 数据传输</h3><p>有了一层SEDA调度模型的抽象，S/E/T/L模块之间互不感知，那几个模块之间的数据传递，需要有一个机制来处理，这里抽象了一个pipe(管道)的概念.</p>
+<p>原理：</p>
+<p>stage | pipe | stage</p>
+<p>基于pipe实现：</p>
+<ul>
+<li>in memory (两个stage经过仲裁器调度算法选择为同一个node时，直接使用内存传输)</li>
+<li>rpc call (&lt;1MB)</li>
+<li>file(gzip) + http多线程下载<br>在pipe中，通过对数据进行TTL控制，解决TCP协议中的丢包问题控制.<h1 id="Otter数据入库算法"><a href="#Otter数据入库算法" class="headerlink" title="Otter数据入库算法"></a>Otter数据入库算法</h1>agapple edited this page on 17 Aug 2013 · 1 revision<h1 id="1-核心算法介绍"><a href="#1-核心算法介绍" class="headerlink" title="1.核心算法介绍"></a>1.核心算法介绍</h1>实际测试中，otter的同步速度相比于mysql的复制，约有5倍左右的性能提升，这取决于其同步算法的实现. 抛弃了强一致性，得到了性能提升<h2 id="1-1-数据合并"><a href="#1-1-数据合并" class="headerlink" title="1.1 数据合并"></a>1.1 数据合并</h2></li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">1. insert + insert -&gt; insert (数据迁移+数据增量场景)</span><br><span class="line">2. insert + update -&gt; insert  (update字段合并到insert)</span><br><span class="line">3. insert + delete -&gt; delete </span><br><span class="line">4. update + insert -&gt; insert (数据迁移+数据增量场景)</span><br><span class="line">5. update + update -&gt; update</span><br><span class="line">6. update + delete -&gt; delete</span><br><span class="line">7. delete + insert -&gt; insert </span><br><span class="line">8. delete + update -&gt; update (数据迁移+数据增量场景)</span><br><span class="line">9. delete + delete -&gt; delete</span><br></pre></td></tr></table></figure>
+
+<p>说明.</p>
+<ol>
+<li><p>insert/行记录update 执行merge sql，解决重复数据执行</p>
+</li>
+<li><p>合并算法执行后，单pk主键只有一条记录，减少并行load算法的复杂性(比如batch合并，并行/串行等处理)</p>
+</li>
+</ol>
+<h2 id="1-2-数据入库算法"><a href="#1-2-数据入库算法" class="headerlink" title="1.2 数据入库算法"></a>1.2 数据入库算法</h2><p>   入库算法采取了按pk hash并行载入+batch合并的优化</p>
+<p>   a. 打散原始数据库事务，预处理数据，合并insert/update/delete数据(参见合并算法)，然后按照table + pk进行并行(相同table的数据，先执行delete,后执行insert/update，串行保证，解决唯一性约束数据变更问题)，相同table的sql会进行batch合并处理</p>
+<p>   b. 提供table权重定义，根据权重定义不同支持”业务上类事务功能”，并行中同时有串行权重控制.</p>
+<p>   业务类事务描述：比如用户的一次交易付款的流程，先产生一笔交易记录，然后修改订单状态为已付款. 用户对这事件的感知，是通过订单状态的已付款，然后进行查询交易记录。</p>
+<p>   所以，可以对同步进行一次编排： 先同步完交易记录，再同步订单状态。 (给同步表定义权重，权重越高的表相对重要，放在后面同步，最后达到的效果可以保证业务事务可见性的功能，快的等慢的. )</p>
+<h2 id="2-初步性能指标："><a href="#2-初步性能指标：" class="headerlink" title="2.初步性能指标："></a>2.初步性能指标：</h2><ol>
+<li><p>单机房同步</p>
+<p>a. 100tps ， 延迟100ms</p>
+<p>b. 5000tps, 延迟1s</p>
+</li>
+<li><p>中美异地机房同步</p>
+<p>a. 100tps ， 延迟2s</p>
+<p>b. 5000tps ，延迟10s</p>
+</li>
+</ol>
+<p>ps. 性能指标取决于目标数据库性能，数据大小等多个因素，单机房100b大小，极限tps可以1w+</p>
+<h1 id="Otter双向回环控制"><a href="#Otter双向回环控制" class="headerlink" title="Otter双向回环控制"></a>Otter双向回环控制</h1><h1 id="1-基本需求"><a href="#1-基本需求" class="headerlink" title="1.基本需求"></a>1.基本需求</h1><p>支持mysql/oracle的异构数据库的双向回环，早期有变态需求：杭州是mysql，美国是oracle，需要做双向同步。<br>需要支持级联同步，比如A&lt;-&gt;B-&gt;C，A同步到B的数据，不能从B回到A，但需要同步到C</p>
+<h1 id="2-实现思路"><a href="#2-实现思路" class="headerlink" title="2.实现思路"></a>2.实现思路</h1><p>利用事务机制，在事务头和尾中插入otter同步标识<br>解析时识别同步标识，判断是否需要屏蔽同步<br>几点注意：</p>
+<p>基于标准SQL实现<br>可以支持mysql/oracle等异构数据库的双向同步<br>事务完整解析&amp;完整可见性<br>事务被拆开同步，会出现部分回环同步，数据不一致. 比如一个事务被拆分为了3截，中间一截因为没有事务头和尾的标识，如果发生同步了，就会导致数据不一致.</p>
+<h1 id="3-实现示意图"><a href="#3-实现示意图" class="headerlink" title="3.实现示意图"></a>3.实现示意图</h1><p><img src="https://upload-images.jianshu.io/upload_images/13935362-82eb56c20f964024?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"></p>
+<h1 id="Otter数据一致性"><a href="#Otter数据一致性" class="headerlink" title="Otter数据一致性"></a>Otter数据一致性</h1><h1 id="1-技术选型分析"><a href="#1-技术选型分析" class="headerlink" title="1.技术选型分析"></a>1.技术选型分析</h1><p>需要处理一致性的业务场景：</p>
+<ul>
+<li>多地修改 (双A机房)</li>
+<li>同一记录，同时变更</li>
+<li>同一记录定义：具体到某一张表，某一条pk，某一字段</li>
+<li>同时变更定义：A地写入的数据在B地还未可见的一段时间范围</li>
+</ul>
+<p>基本思路</p>
+<ul>
+<li>事前控制：比如paoxs协议，在多地数据写入各自数据存储之前，就已经决定好最后保留哪条记录</li>
+<li>事后处理：指A/B两地修改的数据，已经保存到数据库之后，通过数据同步后保证两数据的一致性</li>
+</ul>
+<h2 id="1-1-事前控制"><a href="#1-1-事前控制" class="headerlink" title="1.1 事前控制"></a>1.1 事前控制</h2><p>paxos协议，相信大家研究的人也比较多，但是它有一些局限性，就拿zookeeper来说，它使用了paxos的一个变种，但基本原理还是相似的。</p>
+<p>我们拿zookeeper的几种部署模式来看：</p>
+<ol>
+<li>先看： A地部署leader/follower集群，B地部署observer.</li>
+</ol>
+<p>此时A地收到数据后，需要的网络操作基本为同机房的leader/follower的paxos协议，耗时基本可控</p>
+<p>此时B地收到数据后，需要的网络操作为：</p>
+<ul>
+<li>B地接收到请求，转发给A地，一次机房网络</li>
+<li>A地接收到请求，由leader转发给follower进行投票决策，同机房网络</li>
+<li>A地leader将投票的结构，反馈给B地，一次机房网络.<br>这样一来，也就是说，事务时间 = 一次异地机房RTT + 同机房paxos算法耗时. 比如中美网络延迟200ms，那事务时间基本就是200ms+ 。 但此时，B地机房基本是一个只读镜像，读数据也有延迟，其系统写扩展性全在A机房，某一天当A机房不够用时，A机房进行拆分，就会遇到下一个问题。</li>
+</ul>
+<ol start="2">
+<li>再看：A地和B地组成leader/follower</li>
+</ol>
+<p>此时A地收到数据后，需要的网络操作为：(假如A不是leader，B是leader)</p>
+<ul>
+<li>首先需要发送数据到B，一次机房网络</li>
+<li>B收到A的提议数据后，发起一个投票到A，一次机房网络</li>
+<li>A收到提议后，返回一个投票结果到B，一次机房网络</li>
+<li>B收到大部分投票结果，做出决定之后，将结果反馈给A，一次网络交互.</li>
+</ul>
+<p>这种理想无冲突的情况，总共会有2次RTT，如果优化A发起的提议自己默认投票，不返回给A进行投票，可以优化为1次RTT. 针对中美网络延迟200ms，那事务时间基本是200ms+. 如果A地和B地同时写入，那事务时间可能会翻倍。</p>
+<p>总结：如果你能接受事务时间的影响(比如你A地和B地的网络延迟只有10ms)，那是可以考虑选择paxos协议. 但目前otter所要解决的需求为中美200ms的RTT，暂时无法接收paxos协议来解决一致性问题.</p>
+<h2 id="1-2-事后处理"><a href="#1-2-事后处理" class="headerlink" title="1.2 事后处理"></a>1.2 事后处理</h2><p>针对事后处理，不管哪种方案，一定会是一个最终一致性，因为在你做处理前，A地和B地的数据内容已经不一致了，你不论选择任何一个版本，对另一边来说都是一个数据版本丢失，最终一致性。</p>
+<p>针对数据最终一致性处理，goldengate文档中提到了几种case :</p>
+<ul>
+<li>trusted source. 信任站点，数据出现冲突时，永远以某一边为准覆盖另一边</li>
+<li>timestamp，基于数据的修改时间戳，修改时间新的覆盖旧的数据</li>
+<li>数据类型merge， 比如针对库存信息，A地库存减一，B地库存减二，两边同步之后A地和B地的数据应该是减三，合并两者减一和减二的操作</li>
+</ul>
+<p>针对trusted source/timestamp模型，一定需要建立一个冲突数据kv表，(比如trusted source场景，如果B地修改了记录，而A地没修改此记录，那B地可以覆盖A地，即使A地是trusted source) ，对应冲突数据KV表的插入和删除，如果插入和删除不及时，就会有各种各样的误判，导致数据不一致。</p>
+<p>举个插入不及时的case: 比如A地和B地进行双向同步，同时修改了同一记录，但A地的binlog解析器因为异常挂起了，导致构建冲突数据KV表数据延迟了，而此时B地的数据就会认为无冲突，直接覆盖了A，即使A地是trusted source，然后A地数据解析恢复后，同步到B地时，因为A是trusted source，就会覆盖B地的数据，最后就是A和B两地各为两边之前的版本，导致数据不一致。</p>
+<p>因为goldengate外部文档针对双A机房同步，数据一致性处理描述的比较少，我只能推测到这，基本结论是风险太大，所以otter需要有一种完全可靠的数据一致性方案，这也是本文讨论的重点。</p>
+<h2 id="1-3-单向回环补救-基于trusted-source的改进版"><a href="#1-3-单向回环补救-基于trusted-source的改进版" class="headerlink" title="1.3 单向回环补救 (基于trusted source的改进版)"></a>1.3 单向回环补救 (基于trusted source的改进版)</h2><p><img src="https://upload-images.jianshu.io/upload_images/13935362-a7f1800c2a616f17?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"><br>思路：最终一致性</p>
+<p>适用场景： A地和B地数据不对等，比如A地为主，写入量比较高，B地有少量的数据写入</p>
+<p>单向回环流程：(比如图中以HZ为trusted source站点)</p>
+<ul>
+<li><p>us-&gt;hz同步的数据，会再次进入hz-&gt;us队列，形成一次单向回环</p>
+</li>
+<li><p>hz-&gt;us同步的数据，不会进入us-&gt;hz队列(回环终止，保证不进入死循环)<br>存在的问题：存在同步延迟时，会出现版本丢失高/数据交替性变化</p>
+</li>
+<li><p>比如US同一条记录变更了10个版本，而且很快同步到了HZ，而HZ因为同步数据大，同步延迟，后续单向回环中将10个版本又在US进行了一次重放，导致出现数据交替</p>
+</li>
+<li><p>比如HZ同一条记录变更了10个版本，而且很快同步到了US，而US因为同步延迟，将一个比较早的版本同步到了HZ，后续通过单向回环，将此记录重放到了US，导致之前HZ到US的10个版本丢失.<br>解决方案：</p>
+</li>
+<li><p>反查数据库同步 (以数据库最新版本同步，解决交替性，比如设置一致性反查数据库延迟阀值为60秒，即当同步过程中发现数据延迟超过了60秒，就会基于PK反查一次数据库，拿到当前最新值进行同步，减少交替性的问题)</p>
+</li>
+<li><p>字段同步 (降低冲突概率)</p>
+</li>
+<li><p>同步效率 (同步越快越好，降低双写导致版本丢失概率，不需要构建冲突数据KV表)</p>
+</li>
+<li><p>同步全局控制 (比如HZ-&gt;US和US-&gt;HZ一定要一起启动，一起关闭，保证不会出现一边数据一直覆盖另一边，造成比较多的版本丢失)<br>同步全局控制方案：(分布式Permit)</p>
+</li>
+</ul>
+<p><img src="https://upload-images.jianshu.io/upload_images/13935362-5124aa42a424bff0?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"><br>注意：A,B,C三点状态都正常才允许进行同步(解决数据单向覆盖)。 任何一边的canal不正常工作，都应该停掉整个双向同步，及时性越高越好。</p>
+<h2 id="1-4-时间交集补救"><a href="#1-4-时间交集补救" class="headerlink" title="1.4 时间交集补救"></a>1.4 时间交集补救</h2><p><img src="https://upload-images.jianshu.io/upload_images/13935362-615f8a815d7f87ca?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"><br>算法描述：</p>
+<ol>
+<li>首先定义两个时间概念</li>
+</ol>
+<ul>
+<li>数据变更时间A ：代表业务数据在A地数据库中产生的时间，即图中的时间A</li>
+<li>数据同步时间B：代表数据变更载入到B地数据库的时间，即图中的时间B</li>
+</ul>
+<ol start="2">
+<li><p>针对每条或者一批数据都记录变更时间A和同步时间B，同时保留历史同步过的数据记录</p>
+</li>
+<li><p>图中纵轴为时间轴，Aa代表从数据库A同步到数据库B的一个同步过程，Ba代表从数据库B到同步到的数据库A的一个同步过程,每个同步过程在纵轴上会有两个点，分别代表变更时间A和同步时间B.</p>
+</li>
+<li><p>根据同一时间的定义，在两边数据库的各自同步过程中，以数据库A为例，在数据库B的同步过程找到与Aa有时间交集的批次，比如这里就是Aa 与 (Ba , Bb , Bc)有时间交集</p>
+</li>
+<li><p>针对步骤４中的批次，根据同一数据的定义，在交集的每个批次中，比如首先拿Aa和Ba的历史同步数据记录，根据同一数据定义进行查找，然后再是Aa和Bb，依次类推。</p>
+</li>
+<li><p>针对步骤５中找到的同一数据，最后确定为需要进行单向回环的一致性算法的数据。</p>
+</li>
+</ol>
+<p>此方案相比于单向回环方案：减少单向回环同步的数据量，解决A和B地数据对等的case，不过目前开源版本暂未实现。</p>
+<h1 id="Otter高可用性"><a href="#Otter高可用性" class="headerlink" title="Otter高可用性"></a>Otter高可用性</h1><h1 id="1-基本需求-1"><a href="#1-基本需求-1" class="headerlink" title="1.基本需求"></a>1.基本需求</h1><ol>
+<li>网络不可靠，异地机房尤为明显.</li>
+<li>manager/node的jvm不可靠，需要考虑异常crash情况</li>
+<li>node的jvm不可靠，需要考虑异常crash的情况</li>
+<li>数据库不可靠，需要考虑数据库切换，比如binlog获取和数据载入时，都需要考虑数据库HA机制</li>
+<li>系统发布时，排除正常的jvm关闭和启动</li>
+</ol>
+<h1 id="2-实现思路-1"><a href="#2-实现思路-1" class="headerlink" title="2.实现思路"></a>2.实现思路</h1><h2 id="2-1-考虑node和manager独立部署"><a href="#2-1-考虑node和manager独立部署" class="headerlink" title="2.1 考虑node和manager独立部署"></a>2.1 考虑node和manager独立部署</h2><p>manager对于node来说可以是一个optional的环境，只有在第一次启动任务时需要，node一旦启动了同步任务后，无论manager是否可用，不能影响正常同步。</p>
+<p>需要考虑的点：</p>
+<ul>
+<li>node对于配置需要有本地cache</li>
+<li>node推送统计信息到manager需要有容错处理，需要考虑manager failover(一台manager挂了，需要链接到另一台).<br>目前otter内部，manager部署2台，manager主要集中在杭州机房，node部署70+，node分布在各个机房。</li>
+</ul>
+<h2 id="2-2-建议异常流程处理机制"><a href="#2-2-建议异常流程处理机制" class="headerlink" title="2.2 建议异常流程处理机制"></a>2.2 建议异常流程处理机制</h2><p><img src="https://upload-images.jianshu.io/upload_images/13935362-668a90f61e85836c?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"></p>
+<p>otter调度系统在设计的时候，会有个假定，认为90%的情况都是正常工作的，所以一旦出现异常，处理的代价相对比较高，会使用分布式锁机制。</p>
+<p>仲裁器设计了三种异常机制指令：</p>
+<ul>
+<li><p>WARNING : 只发送报警信息，不做任何S/E/T/L调度干预</p>
+</li>
+<li><p>ROLLBACK : 尝试获取分布式锁，避免并发修改，其次修改分布式Permit为false，停止后续的所有S/E/T/L调度，然后删除所有当前process调度信息，通过zookeeper watcher通知所有相关node，清理对应process的上下文，pipe的数据存储会通过TTL来进行清理，不需要ROLLBACK干预。完成后，释放锁操作</p>
+</li>
+<li><p>RESTART ： 前面几个步骤和ROLLBACK基本类似，唯一不同点在于，在释放锁之前会尝试修改分布式Permit为true，重新开启同步，然后释放锁.<br>罗列了一下不同异常对应的处理机制：</p>
+</li>
+<li><p>两个节点通讯时网络异常，节点发起ROLLBACK</p>
+</li>
+<li><p>节点执行S/E/T/L模块，比如写数据库出现网络异常，节点发起ROLLBACK</p>
+</li>
+<li><p>节点发生了CRASH，由manager进行监听，manager发现后发起RESTART</p>
+</li>
+</ul>
+<h2 id="2-3-node节点监控原理"><a href="#2-3-node节点监控原理" class="headerlink" title="2.3 node节点监控原理"></a>2.3 node节点监控原理</h2><ol>
+<li>和hadoop/hbase原理基本一致，利用zookeeper.每个node在启动完成后，都会在zookeeper中创建一个Ephemerals节点(此节点特点，当node节点发生crash之后，与zookeeper建立的sesstion因为没有心跳，超过一定时间后就会出现SesstionExpired，然后zookeeper会删除该节点)</li>
+<li>manager监听整个node节点列表的变化，任何一个node节点的消失，都会收到zookeeper watcher通知，与内存中上一个版本进行比较，判断出当前消失的node节点</li>
+<li>针对该消失的node节点，会有一段保护期(因为可能正常的发布，会关闭node，同样会触发该watcher)，如果该node在保护期内重新启动了，则不做任何处理。默认保护期为90秒</li>
+<li>如果保护期内node节点未正常启动，说明node是异常crash，通过查询配置，找到使用了该node的所有同步任务，对每个同步任务发起一个RESTART指令，让所有同步任务重新做一次负载均衡选择，避免挂死在老的node上，一直死等其结果返回。</li>
+</ol>
+<h2 id="2-4-数据库切换"><a href="#2-4-数据库切换" class="headerlink" title="2.4 数据库切换"></a>2.4 数据库切换</h2><p>数据库异常问题多种多样，比如数据库hang住，数据库不可用，数据库不可写等等。 在阿里巴巴内部一般会有DBA控制数据库的切换问题。</p>
+<p>比如会有一套管理系统，配置当前mysql主备的关系，发现主机不可用时，他们会通过该系统切备机变为主机，然后推送该配置到所有节点，然后各个客户端收到主备切换消息，更改自己的数据库链接，完成数据库切换。</p>
+<p>因为内部系统无法直接开源，在otter开源版本中，也自带了一个简单版的数据库主备推送的机制，通过页面上的切换按钮，就可以通知到所有的otter节点，切换数据库链接，包括canal的binlog解析和otter数据库loader等。</p>
+<p>otter内部配置中称之为主备配置(media配置)，为一对主备IP，定义一个groupKey。然后在各个地方使用该groupKey。</p>
+<ul>
+<li>比如jdbc url使用group后为：jdbc:mysql://groupKey=xxxx</li>
+<li>canal中可以选择HA机制为media，然后填入对应的groupKey即可<br>发现需要做数据库切换了，可以直接点击切换按钮，目前otter的实现为定时轮询非推送，一般需要1分钟左右才会正式生效，或者发生一次RESTART指令。同样，主备切换可以暴露为服务，方便大家接入各自的数据库管理平台，这也是otter抽象这么一层主备切换配置的原因.</li>
+</ul>
+<h1 id="Otter扩展性"><a href="#Otter扩展性" class="headerlink" title="Otter扩展性"></a>Otter扩展性</h1><h1 id="1-扩展性定义"><a href="#1-扩展性定义" class="headerlink" title="1.扩展性定义"></a>1.扩展性定义</h1><p>按照实现不同，可分为两类：</p>
+<ol>
+<li>数据处理自定义，比如Extract , Transform的数据处理. 目前Select/Load不支持数据自定义处理</li>
+<li>组件功能性扩展，比如支持oracle日志获取，支持hbase数据输出等.</li>
+</ol>
+<h2 id="1-1-数据处理自定义"><a href="#1-1-数据处理自定义" class="headerlink" title="1.1 数据处理自定义"></a>1.1 数据处理自定义</h2><p>Extract模块：</p>
+<ul>
+<li>EventProcessor : 自定义数据处理，可以改变一条变更数据的任意内容</li>
+<li>FileResolver : 解决数据和文件的关联关系<br>目前两者都只支持java语言编写，但都支持运行时动态编译&amp;lib包载入的功能。</li>
+</ul>
+<ol>
+<li>通过Otter Manager直接发布source文件代码，然后推送到node节点上即时生效，不需要重启任何java进程，有点动态语言的味道</li>
+<li>可以将class文件放置到extend目录或者打成jar包，放置在node启动classpath中，也可以通过Otter Manager指定类名的方式进行加载，这样允许业务完全自定义。(但有个缺点，如果使用了一些外部包加入到node classpath中，比如远程接口调用，目前EventProcessor的调用是串行处理，针对串行进行远程调用执行，效率会比较差. )<br><img src="https://upload-images.jianshu.io/upload_images/13935362-f6ab20058d06a963?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image"><br>EventProcessor接口示例：</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * 业务自定义处理过程</span><br><span class="line"> * </span><br><span class="line"> * @author jianghang 2012-6-25 下午02:26:36</span><br><span class="line"> * @version 4.1.0</span><br><span class="line"> */</span><br><span class="line">public interface EventProcessor &#123;</span><br><span class="line">/**</span><br><span class="line"> * 自定义处理单条EventData对象</span><br><span class="line"> * </span><br><span class="line"> * @return &#123;@link EventData&#125; 返回值=null，需要忽略该条数据</span><br><span class="line"> */</span><br><span class="line">public EventData process(EventData eventData);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-2-扩展代码开发"><a href="#1-2-扩展代码开发" class="headerlink" title="1.2 扩展代码开发"></a>1.2 扩展代码开发</h2><h3 id="1-2-1-自定义维护"><a href="#1-2-1-自定义维护" class="headerlink" title="1.2.1 自定义维护"></a>1.2.1 自定义维护</h3><p>依赖配置：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">	&lt;groupId&gt;com.alibaba.otter&lt;/groupId&gt;</span><br><span class="line">	&lt;artifactId&gt;shared.etl&lt;/artifactId&gt;</span><br><span class="line">	&lt;version&gt;x.y.z&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">	&lt;groupId&gt;com.alibaba.otter&lt;/groupId&gt;</span><br><span class="line">	&lt;artifactId&gt;node.extend&lt;/artifactId&gt;</span><br><span class="line">	&lt;version&gt;x.y.z&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+
+<p>a. 创建mvn标准工程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mvn archetype:create -DgroupId=com.alibaba.otter -DartifactId=node.code</span><br></pre></td></tr></table></figure>
+
+<p>b. 修改pom.xml，添加依赖<br>c. mvn eclipse:eclipse导入工程</p>
+<p>d. 代码开发完成后，使用的有两种选择：1. manager上选择source，直接粘帖源码 . 2. 将该代码打成jar包，放到node工程的lib目录下，在manager上选择clazz后，写上对应的类名即可</p>
+<h3 id="1-2-2-基于otter-extend工程维护"><a href="#1-2-2-基于otter-extend工程维护" class="headerlink" title="1.2.2 基于otter.extend工程维护"></a>1.2.2 基于otter.extend工程维护</h3><p>a. 下载otter源码包， <a href="https://github.com/alibaba/otter" target="_blank" rel="noopener">https://github.com/alibaba/otter</a></p>
+<p>b. 导入工程.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mvn clean eclipse:eclipse install -Dmaven.test.skip</span><br></pre></td></tr></table></figure>
+
+<p>c. 代码开发完成后，使用的有两种选择：1. manager上选择source，直接粘帖源码 . 2. 整个otter编译打包，发布后，在manager上选择clazz后，写上对应的类名即可</p>
+<h2 id="1-3-扩展示例代码："><a href="#1-3-扩展示例代码：" class="headerlink" title="1.3 扩展示例代码："></a>1.3 扩展示例代码：</h2><p>EventProcessor扩展：<a href="https://github.com/alibaba/otter/blob/master/node/extend/src/main/java/com/alibaba/otter/node/extend/processor/TestEventProcessor.java" target="_blank" rel="noopener">https://github.com/alibaba/otter/blob/master/node/extend/src/main/java/com/alibaba/otter/node/extend/processor/TestEventProcessor.java</a></p>
+<p>FileResolver扩展：<a href="https://github.com/alibaba/otter/blob/master/node/extend/src/main/java/com/alibaba/otter/node/extend/fileresolver/TestFileResolver.java" target="_blank" rel="noopener">https://github.com/alibaba/otter/blob/master/node/extend/src/main/java/com/alibaba/otter/node/extend/fileresolver/TestFileResolver.java</a></p>
+<h2 id="1-4-组件功能性扩展"><a href="#1-4-组件功能性扩展" class="headerlink" title="1.4 组件功能性扩展"></a>1.4 组件功能性扩展</h2><p>目前这块扩展性机制不够，设计时只预留了接口，但新增一个功能实现，需要通过硬编码的方式去进行，下载otter的源码，增加功能支持，修改spring配置，同时修改web页面，方便使用。</p>
+<p>基于manager的灵活扩展性的实现，暂没有想到很好的办法，如果你有好的思路和实现方式，也可以告知我们，谢谢。</p>
+<p>比如举增加hbase load实现为例，需要扩展的内容：</p>
+<ul>
+<li>增加hbase数据源的抽象</li>
+<li>增加hbase表的抽象，比如column，columnFamily</li>
+<li>增加hbase transform的实现</li>
+<li>增加hbase loader的实现</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/wechat-qcode.jpg" alt="林夕_Yume wechat" style="width: 200px; max-width: 100%;">
+    <div>欢迎您订阅我的公众号!</div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持分享，您的支持是我创作的动力!</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="林夕_Yume 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Otter/" rel="tag"># Otter</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/07/27/1.Otter初步介绍/" rel="next" title="1.Otter初步介绍">
+                <i class="fa fa-chevron-left"></i> 1.Otter初步介绍
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/07/27/3.Otter快速上手/" rel="prev" title="3.Otter快速上手">
+                3.Otter快速上手 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/monkey.jpg" alt="林夕_Yume">
+            
+              <p class="site-author-name" itemprop="name">林夕_Yume</p>
+              <p class="site-description motion-element" itemprop="description">一个分享自己经历，感触以及工作成长的地方。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-globe"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.jianshu.com/u/3fa2b243f30d" title="林夕_Yume的简书" target="_blank">林夕_Yume的简书</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Introduction"><span class="nav-number">1.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#项目介绍"><span class="nav-number">2.</span> <span class="nav-text">项目介绍</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#工作原理"><span class="nav-number">3.</span> <span class="nav-text">工作原理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#otter能解决什么？"><span class="nav-number">4.</span> <span class="nav-text">otter能解决什么？</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#单机房复制示意图："><span class="nav-number">4.1.</span> <span class="nav-text">单机房复制示意图：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#异地机房复制示意图："><span class="nav-number">4.2.</span> <span class="nav-text">异地机房复制示意图：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#初步性能指标："><span class="nav-number">4.3.</span> <span class="nav-text">初步性能指标：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#相关名词解释"><span class="nav-number">5.</span> <span class="nav-text">相关名词解释</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#otter核心model关系图"><span class="nav-number">5.1.</span> <span class="nav-text">otter核心model关系图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#名词解释"><span class="nav-number">5.2.</span> <span class="nav-text">名词解释</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#otter的S-E-T-L-stage阶段模型"><span class="nav-number">5.3.</span> <span class="nav-text">otter的S/E/T/L stage阶段模型</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Otter调度模型"><span class="nav-number">6.</span> <span class="nav-text">Otter调度模型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-背景"><span class="nav-number">7.</span> <span class="nav-text">1.背景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-调度模型"><span class="nav-number">8.</span> <span class="nav-text">2.调度模型</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-Nagle算法"><span class="nav-number">8.1.</span> <span class="nav-text">2.1 Nagle算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-滑动窗口"><span class="nav-number">8.2.</span> <span class="nav-text">2.2 滑动窗口</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-1-并行度"><span class="nav-number">8.2.1.</span> <span class="nav-text">2.2.1 并行度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-2-数据可靠性"><span class="nav-number">8.2.2.</span> <span class="nav-text">2.2.2 数据可靠性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-3-编程模型抽象-SEDA模型"><span class="nav-number">8.2.3.</span> <span class="nav-text">2.2.3 编程模型抽象(SEDA模型)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#仲裁器算法"><span class="nav-number">8.2.4.</span> <span class="nav-text">仲裁器算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-4-调度算法成本估算"><span class="nav-number">8.2.5.</span> <span class="nav-text">2.2.4 调度算法成本估算</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-5-数据传输"><span class="nav-number">8.2.6.</span> <span class="nav-text">2.2.5 数据传输</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Otter数据入库算法"><span class="nav-number">9.</span> <span class="nav-text">Otter数据入库算法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-核心算法介绍"><span class="nav-number">10.</span> <span class="nav-text">1.核心算法介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-数据合并"><span class="nav-number">10.1.</span> <span class="nav-text">1.1 数据合并</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-数据入库算法"><span class="nav-number">10.2.</span> <span class="nav-text">1.2 数据入库算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-初步性能指标："><span class="nav-number">10.3.</span> <span class="nav-text">2.初步性能指标：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Otter双向回环控制"><span class="nav-number">11.</span> <span class="nav-text">Otter双向回环控制</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-基本需求"><span class="nav-number">12.</span> <span class="nav-text">1.基本需求</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-实现思路"><span class="nav-number">13.</span> <span class="nav-text">2.实现思路</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-实现示意图"><span class="nav-number">14.</span> <span class="nav-text">3.实现示意图</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Otter数据一致性"><span class="nav-number">15.</span> <span class="nav-text">Otter数据一致性</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-技术选型分析"><span class="nav-number">16.</span> <span class="nav-text">1.技术选型分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-事前控制"><span class="nav-number">16.1.</span> <span class="nav-text">1.1 事前控制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-事后处理"><span class="nav-number">16.2.</span> <span class="nav-text">1.2 事后处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-单向回环补救-基于trusted-source的改进版"><span class="nav-number">16.3.</span> <span class="nav-text">1.3 单向回环补救 (基于trusted source的改进版)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-4-时间交集补救"><span class="nav-number">16.4.</span> <span class="nav-text">1.4 时间交集补救</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Otter高可用性"><span class="nav-number">17.</span> <span class="nav-text">Otter高可用性</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-基本需求-1"><span class="nav-number">18.</span> <span class="nav-text">1.基本需求</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-实现思路-1"><span class="nav-number">19.</span> <span class="nav-text">2.实现思路</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-考虑node和manager独立部署"><span class="nav-number">19.1.</span> <span class="nav-text">2.1 考虑node和manager独立部署</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-建议异常流程处理机制"><span class="nav-number">19.2.</span> <span class="nav-text">2.2 建议异常流程处理机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-node节点监控原理"><span class="nav-number">19.3.</span> <span class="nav-text">2.3 node节点监控原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-数据库切换"><span class="nav-number">19.4.</span> <span class="nav-text">2.4 数据库切换</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Otter扩展性"><span class="nav-number">20.</span> <span class="nav-text">Otter扩展性</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-扩展性定义"><span class="nav-number">21.</span> <span class="nav-text">1.扩展性定义</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-数据处理自定义"><span class="nav-number">21.1.</span> <span class="nav-text">1.1 数据处理自定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-扩展代码开发"><span class="nav-number">21.2.</span> <span class="nav-text">1.2 扩展代码开发</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-1-自定义维护"><span class="nav-number">21.2.1.</span> <span class="nav-text">1.2.1 自定义维护</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-2-基于otter-extend工程维护"><span class="nav-number">21.2.2.</span> <span class="nav-text">1.2.2 基于otter.extend工程维护</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-扩展示例代码："><span class="nav-number">21.3.</span> <span class="nav-text">1.3 扩展示例代码：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-4-组件功能性扩展"><span class="nav-number">21.4.</span> <span class="nav-text">1.4 组件功能性扩展</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">林夕_Yume</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
